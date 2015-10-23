@@ -1,2 +1,2 @@
 # iDebugConsole
-A compact debug and console window for javascript debugging.
+A compact javscript console wrapper with a debug switch and a compact output window that won't slow you down.
