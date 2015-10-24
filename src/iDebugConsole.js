@@ -1,4 +1,4 @@
-console.log('-> debug.js loading')
+console.log('-> testing4 iDebugConsole.js loading')
 /**
  * Constructs Debugger instance
  * @class Add to any class constructor to provide easy control over console output of debug data.
@@ -48,7 +48,6 @@ Debugger.prototype = function (){
     // view class properties
     var d           = document
     var b           = document.documentElement || document.body
-    var eDebug      = null          // TODO: may not be required any more
     var eCont       = null          // controlls height & width
     var eOpCont     = null          // controlls scroll position of output
     var eOutput     = null          // holds the output lines
@@ -79,6 +78,7 @@ Debugger.prototype = function (){
         // elements
         eCont = createEle("div", document.body, "#debug-cont")
             eCont.style.width = initOpenW
+            eCont.style.minWidth = closedSize
             eCont.style.height = initOpenH
             close() // sets the initial state open / close
         eOpCont = createEle("div", eCont, ".op-cont")
@@ -112,11 +112,15 @@ Debugger.prototype = function (){
 
     var open = function (size){
         eCont.style.width = size
+        eCont.style.minWidth = ''
+        eCont.style.maxWidth = ''
         eCont.style.whiteSpace = ""
     }
 
     var close = function (){
         eCont.style.width = closedSize
+        eCont.style.minWidth = closedSize
+        eCont.style.maxWidth = closedSize
         eCont.style.whiteSpace = "nowrap"
     }
 
@@ -822,4 +826,4 @@ Profiler.prototype = function () {
         printResults:printResults
 	};
 }();
-console.log('-> debug.js ready')
+console.log('-> iDebugConsole.js ready')
