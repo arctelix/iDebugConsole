@@ -1,0 +1,165 @@
+#debug-cont{
+    position: fixed;
+    bottom:0;
+    left:0;
+    z-index: 999999999999999999;
+    width: 50%;
+    max-width: 100%;
+    max-height: 100%;
+    min-height: 54px;
+    height: 40%;
+    pointer-events: none;
+    display: block;/* border-box is required when border is used */
+    box-sizing: border-box;
+    border: 3px solid rgba(84, 84, 84, 0.8);
+    font-size: 12pt;
+    background: none;
+}
+    #debug-cont.scroll {
+        /* min-width: 311px; */
+        pointer-events: auto;
+        /*border: 1px solid rgb(255, 0, 0);*/
+        /* border-bottom: none; */
+        background-color: rgba(84, 84, 84,.8);
+    }
+    #debug-cont.scroll .op-cont {
+        overflow-y: scroll;
+        -webkit-overflow-scrolling: touch;
+        pointer-events: all;
+    }
+    #debug-cont.scroll .output {
+        position: relative;
+    }
+
+    #debug-cont.dragging{
+        background-color: rgba(84, 84, 84, 1);
+    }
+
+#debug-cont.scroll .drag-area{
+     display:block;
+}
+#debug-cont .drag-area{
+    background-color: rgba(84, 84, 84, 0.3);
+    /* background-color: red; */
+    z-index: 99;
+}
+
+#debug-cont .op-cont {
+    position: absolute;
+    bottom: 28px;
+    top: 0;
+    padding: 0;
+    /* margin: 5px; */
+    width: 100%;
+    height: auto;
+    background-color: rgba(84, 84, 84, 0.8);
+    overflow: hidden;
+    pointer-events: none;
+}
+
+#DRSghost {
+	background: #3C3C3C;
+	position: fixed;
+	z-index: 98;
+	-webkit-transition: all 0.25s ease-in-out;
+	-moz-transition: all 0.25s ease-in-out;
+	-ms-transition: all 0.25s ease-in-out;
+	-o-transition: all 0.25s ease-in-out;
+	transition: all 0.25s ease-in-out;
+	pointer-events: none;
+}
+
+@media screen and (max-device-width: 480px) and (orientation: portrait){
+  #debug-cont{
+      width: 100%;
+  }
+}
+
+/* #### Mobile Phones Landscape #### */
+@media screen and (max-device-width: 640px) and (orientation: landscape){
+  #debug-cont {
+      max-width: 75%;
+  }
+}
+
+#debug-cont .output{
+    position: absolute;
+    bottom: 0;
+    /* left: 0; */
+    /* right: 0; */
+    /* height: 100%; */
+    /* background-color: rgba(84, 84, 84, 0.8); */
+    color: rgb(160,206,27);
+    width: 100%;
+    /* min-width: 300px; */
+    min-height: 50px;
+    list-style-type: decimal-leading-zero;
+    list-style-position: outside;
+    /* padding: 0 7px; */
+    margin: 0;
+    overflow: hidden;
+}
+#debug-cont .output li i{
+    pointer-events: all;
+    cursor: pointer;
+    vertical-align: text-top;
+}
+#debug-cont .options{
+    position: absolute;
+    /* margin: 5px; */
+    bottom: 0;
+    z-index: 100;
+    height: 28px;
+    width: 100%;
+    background-color: rgba(51, 51, 51, 0.8);
+    overflow: hidden;
+    pointer-events: all;
+    font-size: 24px;
+    line-height: 25px;
+    color: white;
+    vertical-align: middle;
+}
+
+#debug-cont.closed .options{
+
+}
+
+#debug-cont .btn{
+    height: 100%;
+    margin: 0 4px;
+    font-size: inherit;
+    line-height: inherit;
+    padding: 0;
+    border: none;
+    pointer-events: all;
+    cursor: pointer;
+    border-radius: 0;
+    background: none;
+    min-width: 22px;
+    color:rgba(255, 255, 255, .8);
+    font-weight: normal;
+    font-family: Helvetica, Arial, sans-serif;
+    vertical-align: inherit;
+ }
+
+#debug-cont .btn.off{
+    color: rgba(255, 255, 255, .5);
+}
+
+#debug-cont li {
+    margin-bottom: 2px;
+    /* vertical-align: middle; */
+}
+
+#debug-cont li.log {
+    color: rgb(169, 208, 57);
+}
+#debug-cont li.info {
+    color: rgb(204, 204, 204)
+}
+#debug-cont li.warn {
+    color: rgb(206, 146, 37);
+}
+#debug-cont li.error {
+    color: rgb(255, 70, 70);
+}
