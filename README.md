@@ -13,7 +13,8 @@ All that utility at just 0.309kb minified in a production environment and under 
 in development.
 
 #### Requirements:
-You must load the folowing libraries prior to use: 
+If you want to use the output window the following files are required: 
 https://github.com/arctelix/drag-resize-snap
+https://github.com/arctelix/vanillaHelper
 
 #### See the docs for more.
