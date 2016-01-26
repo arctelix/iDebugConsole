@@ -12,4 +12,8 @@ components.
 All that utility at just 0.309kb minified in a production environment and under 12kb minified 
 in development.
 
-See the docs for more info on the Debugger & Profiler classes.
+#### Requirements:
+You must load the folowing libraries prior to use: 
+https://github.com/arctelix/drag-resize-snap
+
+#### See the docs for more.
