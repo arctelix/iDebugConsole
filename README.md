@@ -14,7 +14,7 @@ in development.
 
 #### Requirements:
 If you want to use the output window the following files are required: 
-https://github.com/arctelix/drag-resize-snap
-https://github.com/arctelix/vanillaHelper
+https://github.com/arctelix/drag-resize-snap/blob/master/drs.js
+https://github.com/arctelix/vanillaHelper/blob/master/vanillaHelper.js
 
 #### See the docs for more.
