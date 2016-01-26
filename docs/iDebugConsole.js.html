@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: iDebugConsole.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: iDebugConsole.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @namespace
  * @description This package provides debugging and profiling tools.  The primary purpose is to provide a means for 
  * controlling console output globally and within closures as required.  An optional output window is provided as well.  
@@ -43,13 +71,13 @@ var iDebugConsole = function() {
      * as django which supplies it's own debug flag.  To toggle the global debug flag use the global method of any
      * Debugger instance or Debugger.prototype.
      *
-     * @example <caption>Enable debug output before loading.</caption>
-     *  <script language="javascript">window.iDebugMode=true</script>
-     *  <script src="js/iDebugConsole.js""></script>
+     * @example &lt;caption>Enable debug output before loading.&lt;/caption>
+     *  &lt;script language="javascript">window.iDebugMode=true&lt;/script>
+     *  &lt;script src="js/iDebugConsole.js"">&lt;/script>
      *
-     * @example <caption>Enable debug output after loading.</caption>
-     *  <script src="js/iDebugConsole.js""></script>
-     *  <script language="javascript">
+     * @example &lt;caption>Enable debug output after loading.&lt;/caption>
+     *  &lt;script src="js/iDebugConsole.js"">&lt;/script>
+     *  &lt;script language="javascript">
      *
      *      this.debug('This will not be output to the console')
      *
@@ -61,7 +89,7 @@ var iDebugConsole = function() {
      *
      *      this.debug('This will be output to the console')
      *      this.debug.warn('It supports all valid console methods')
-     * </script>
+     * &lt;/script>
      *
      * The iDebugConsole window is disabled by default, output will be directed only to the native console window.
      * Although the iDebugConsole window has a vary small feature set compared to the native console there are a few
@@ -74,35 +102,35 @@ var iDebugConsole = function() {
      * - It scales it's self to the device screen size.
      * - It can be dragged, resized, docked, or full screen on demand.
      *
-     * @example <caption>Enable iDebugConsole output window.</caption>
-     *  <script language="javascript">
+     * @example &lt;caption>Enable iDebugConsole output window.&lt;/caption>
+     *  &lt;script language="javascript">
      *      // Enable the on screen output in closed mode (minimized).
      *      iDebugger.initView('closed')
      *      // Enable the on screen output window via the Debugger prototype
      *      Debugger.prototype.initView('open')
-     *  </script>
+     *  &lt;/script>
      *
      * Note:: When using the iDebugConsole output window, the output will also appear in the native browser console window,
      * but the location data will show a Debugger location. Corrected location data will be injected into each debug statement.
      *
-     * @example <caption>Use django to set the global debug state</caption>
+     * @example &lt;caption>Use django to set the global debug state&lt;/caption>
      * 1) In your django settings file TEMPLATE_CONTEXT_PROCESSORS must contain the debug context processor:
-     *   'django.core.context_processors.debug' (django < 1.8) or
+     *   'django.core.context_processors.debug' (django &lt; 1.8) or
      *   'django.template.context_processors.debug' (django >= 1.8)
      * 2) Make sure you have defined the setting INTERNAL_IPS = ('127.0.0.1',) add ip addresses as required.
      * 3) In your HTML template file use the {{debug}} variable supplied by django's debug context processor
      *    to set window.iDebugMode and load iDebugConsole.
      *    {% if debug %}
-     *       <script language="javascript">window.iDebugMode=true</script>
+     *       &lt;script language="javascript">window.iDebugMode=true&lt;/script>
      *    {% endif %}
-     *    <script src="{% static "js/iDebugConsole.js" %}"></script>
+     *    &lt;script src="{% static "js/iDebugConsole.js" %}">&lt;/script>
      *
-     * @example <caption>Minimize iDebugConsole's footprint in production:</caption>
+     * @example &lt;caption>Minimize iDebugConsole's footprint in production:&lt;/caption>
      *    {% if debug %}
-     *       <script language="javascript">window.iDebugMode=true</script>
-     *       <script src="{% static "js/iDebugConsole.js" %}"></script>
+     *       &lt;script language="javascript">window.iDebugMode=true&lt;/script>
+     *       &lt;script src="{% static "js/iDebugConsole.js" %}">&lt;/script>
      *    {% else %}
-     *      <script src="{% static "js/iDebugDummy.js" %}"></script>
+     *      &lt;script src="{% static "js/iDebugDummy.js" %}">&lt;/script>
      *    {% endif %}
      *
      *    NOTE:: Alternatively just copy the contents of iDebugDummy.js and paste into the top of your javascript.
@@ -114,7 +142,7 @@ var iDebugConsole = function() {
      * @param   {object}    objects         - Specify included objects as {key:object} pairs.
      * @param   {boolean}   [state=false]   - Initial debug output state for all objects true=on false=off.
      *
-     * @example <caption>Instantiate a Debugger within a class for class level control.</caption>
+     * @example &lt;caption>Instantiate a Debugger within a class for class level control.&lt;/caption>
      * function MyClass (){
      *     var ctrl = new Controller
      *     var model = new Model(ctrl)
@@ -125,7 +153,7 @@ var iDebugConsole = function() {
      *     this.debug('This is the same as calling console.log()')
      * }
      *
-     * @example <caption>Dynamically toggle debugging only for a specified closure.</caption>
+     * @example &lt;caption>Dynamically toggle debugging only for a specified closure.&lt;/caption>
      * var myClass = new MyClass()
      *
      * //turn off the MyClass debugger
@@ -149,7 +177,7 @@ var iDebugConsole = function() {
     }
     Debugger.prototype = function () {
 
-        // Class variables & methods
+        // Class variables &amp; methods
 
         //Tracks all debugger objects for global control.
         var allDebuggers = []
@@ -181,7 +209,7 @@ var iDebugConsole = function() {
          * @private
          */
         function init(state) {
-            if (!state && state !== false) console.log('You have not supplied a debug state for', this._objects)
+            if (!state &amp;&amp; state !== false) console.log('You have not supplied a debug state for', this._objects)
             setState.call(this, state);
 
             for (var key in this._objects) {
@@ -208,7 +236,7 @@ var iDebugConsole = function() {
          * Turns off debugging for specified object or all abjects if no object key is specified.
          * @param {string} [key] - Name given to object in objects perameter {@link Debugger~objects}.
          * @returns {Debugger.state}
-         * @example <caption>Turn off debug output</caption>
+         * @example &lt;caption>Turn off debug output&lt;/caption>
          * // Sets all included objects this._debug = false
          * myClass.debugger.off();
          * // Sets myClass.model._debug = false
@@ -223,7 +251,7 @@ var iDebugConsole = function() {
          * Turns on debugging for specified object or all abjects if no object key is specified.
          * @param {string} [key] - Name given to object in objects perameter {@link Debugger~objects}.
          * @returns {Debugger.state}
-         * @example <caption>Turn on debug output</caption>
+         * @example &lt;caption>Turn on debug output&lt;/caption>
          * // Sets all included objects this._debug = true
          * myClass.debugger.on();
          * // Sets myClass.model._debug = true
@@ -277,7 +305,7 @@ var iDebugConsole = function() {
         /**
          * Returns the debug state of all included objects as an object.
          * @example {"view":"off", "model":"on", "ctrl":"on"}
-         * @returns {Object.<key,state>}
+         * @returns {Object.&lt;key,state>}
          * @memberof Debugger
          * @private
          */
@@ -343,18 +371,18 @@ var iDebugConsole = function() {
         var bClose, bClear, bScroll, bScrollUp, bScrollDn, bAutoScroll, bDrag,
             bHelp, bSize, bTogLoc
 
-        var iOpen = "&#10016"
-        var iClear = "&#8802"
-        var iScroll = "&#8645;"
-        var iDrag = "&#10019;"
-        var iAutoScroll = "&#8794;"
-        var iSize = "&#8622;"
-        var iHelp = "&#9764;"
-        var iScrlUp = "&#9650;"
-        var iScrlDn = "&#9660;"
-        var iTogLoc = "&#x00040;"
-        var iLoc = "&#x00040;"
-        var iStack = "&#8801;"
+        var iOpen = "&amp;#10016"
+        var iClear = "&amp;#8802"
+        var iScroll = "&amp;#8645;"
+        var iDrag = "&amp;#10019;"
+        var iAutoScroll = "&amp;#8794;"
+        var iSize = "&amp;#8622;"
+        var iHelp = "&amp;#9764;"
+        var iScrlUp = "&amp;#9650;"
+        var iScrlDn = "&amp;#9660;"
+        var iTogLoc = "&amp;#x00040;"
+        var iLoc = "&amp;#x00040;"
+        var iStack = "&amp;#8801;"
 
 
         // Output window class methods
@@ -486,13 +514,13 @@ var iDebugConsole = function() {
                 e.preventDefault()
 
                 // disable buttons in help mode
-                if (!isClicked(e, 'btn-help') && hasClass(bHelp, 'active'))
+                if (!isClicked(e, 'btn-help') &amp;&amp; hasClass(bHelp, 'active'))
                     return
                 // close
                 if (hasClass(e.target, 'btn-close')) {
                     scrollMode = hasClass(eCont, 'scroll')
                     var width = eCont.getBoundingClientRect().width
-                    if (width <= parseInt(closedSize + 5))
+                    if (width &lt;= parseInt(closedSize + 5))
                         open(scrollMode ? scrollWd || initOpenW : passiveWd || initOpenW)
                     else
                         close()
@@ -529,7 +557,7 @@ var iDebugConsole = function() {
 
                     if (rt === ww || rt > ww / 2) {
                         debugCont.style.right = 0
-                    } else if (rt === 0 || rt < ww / 2) {
+                    } else if (rt === 0 || rt &lt; ww / 2) {
                         debugCont.style.right = ww + "px"
                     }
 
@@ -540,7 +568,7 @@ var iDebugConsole = function() {
                     if (state) {
                         drs.snapFullScreen()
                         toggleScrollMode(true, false)
-                        bHelp.innerHTML += '<span style="font-size:10px;">Exit Help</span>'
+                        bHelp.innerHTML += '&lt;span style="font-size:10px;">Exit Help&lt;/span>'
                     } else {
                         drs.restorePreSnap()
                         toggleScrollMode(false, false)
@@ -549,47 +577,47 @@ var iDebugConsole = function() {
                     }
 
                     clearView(
-                        '<li><b>OUTPUT LINE BUTTONS:</b></li>' +
-                        '<ul>' + 'Each output line has the following buttons:' +
-                        '<li>' + iStack + ' <b>Stack:</b> Shows the full stack trace.</li>' +
-                        '<li>' + iLoc + ' <b>Location:</b> Show the location (file:line:col).</li>' +
-                        '</ul>' +
-                        '<li><b>WINDOW SIZE AND POSITION:</b></li>' +
-                        '<ul>' +
-                        '<li>' + iOpen + ' <b>Close/Open:</b> Toggle window open and closed.</li>' +
-                        '<li>' + iDrag + '<b> Move:</b> Press and drag to move window. The shaded ' +
-                        'line number area will also allow move.</li>' +
-                        '<li>' + iSize + ' Toggle Bounds: Make bounds fixed or a percentage of the browser window ' +
-                        '(size changes as window size changes).</li>' +
-                        '<li><b>Resize:</b> Press and drag any edge to resize window, corder will ' +
-                        'double resize.</li>' +
-                        '<li><b>Snap:</b> Drag just past a screen edge to snap.</li>' +
-                        '<li><b>FullScreen:</b> Drag 100px or more past an edge to go full screen.</li>' +
-                        '<li><b>Unsnap:</b> Drag in any direction away from edge for unsnap and resize to pre-snap dimentions ' +
+                        '&lt;li>&lt;b>OUTPUT LINE BUTTONS:&lt;/b>&lt;/li>' +
+                        '&lt;ul>' + 'Each output line has the following buttons:' +
+                        '&lt;li>' + iStack + ' &lt;b>Stack:&lt;/b> Shows the full stack trace.&lt;/li>' +
+                        '&lt;li>' + iLoc + ' &lt;b>Location:&lt;/b> Show the location (file:line:col).&lt;/li>' +
+                        '&lt;/ul>' +
+                        '&lt;li>&lt;b>WINDOW SIZE AND POSITION:&lt;/b>&lt;/li>' +
+                        '&lt;ul>' +
+                        '&lt;li>' + iOpen + ' &lt;b>Close/Open:&lt;/b> Toggle window open and closed.&lt;/li>' +
+                        '&lt;li>' + iDrag + '&lt;b> Move:&lt;/b> Press and drag to move window. The shaded ' +
+                        'line number area will also allow move.&lt;/li>' +
+                        '&lt;li>' + iSize + ' Toggle Bounds: Make bounds fixed or a percentage of the browser window ' +
+                        '(size changes as window size changes).&lt;/li>' +
+                        '&lt;li>&lt;b>Resize:&lt;/b> Press and drag any edge to resize window, corder will ' +
+                        'double resize.&lt;/li>' +
+                        '&lt;li>&lt;b>Snap:&lt;/b> Drag just past a screen edge to snap.&lt;/li>' +
+                        '&lt;li>&lt;b>FullScreen:&lt;/b> Drag 100px or more past an edge to go full screen.&lt;/li>' +
+                        '&lt;li>&lt;b>Unsnap:&lt;/b> Drag in any direction away from edge for unsnap and resize to pre-snap dimentions ' +
                         'or Click the drag button for unsnap and retain snapped size.' +
-                        '<li><b>Center:</b> Tripple tap anywhere to center on the screen.</li>' +
-                        '</ul>' +
-                        '<li><b>WINDOW SCROLL / WINDOW GHOST:</b></li>' +
-                        '<ul>' +
-                        '<li>' + iScroll + ' <b>Toggle Ghost/Scroll:</b> Ghost mode will pass all mouse and ' +
+                        '&lt;li>&lt;b>Center:&lt;/b> Tripple tap anywhere to center on the screen.&lt;/li>' +
+                        '&lt;/ul>' +
+                        '&lt;li>&lt;b>WINDOW SCROLL / WINDOW GHOST:&lt;/b>&lt;/li>' +
+                        '&lt;ul>' +
+                        '&lt;li>' + iScroll + ' &lt;b>Toggle Ghost/Scroll:&lt;/b> Ghost mode will pass all mouse and ' +
                         'touch events to obscured items.  Scroll mode allows for scrolling up and ' +
-                        'down, but will block touch and mouse events from obscured items.<br>' +
-                        'Note: Scroll mode and ghost mode will remember thier respective sizes!</li>' +
-                        '<li>' + iScrlUp + ' <b>Scroll Up:</b> One full page (only in scroll mode).</li>' +
-                        '<li>' + iScrlDn + ' <b>Scroll Down:</b> One full page (only in scroll mode).</li>' +
-                        '<li>' + iAutoScroll + ' <b>Auto Scroll:</b> Scroll to the last line as they come.</li>' +
-                        '</ul>' +
-                        '<li><b>OTHER BUTTONS:</b></li>' +
-                        '<ul>' +
-                        '<li>' + iClear + ' <b>Clear:</b> Clears the contents of the ouput window.</li>' +
-                        '<li>' + iTogLoc + ' Toggle location: Toggle location for all lines.' +
-                        ' changes as window size changes).</li>' +
-                        '<li>' + iHelp + ' <b>Help:</b> You are here.</li>' +
-                        '</ul>' +
-                        '<li><b>CSS:</b></li>' +
-                        '<ul>' +
-                        '<li>Style colors and whatnot with css.' +
-                        '</ul>'
+                        'down, but will block touch and mouse events from obscured items.&lt;br>' +
+                        'Note: Scroll mode and ghost mode will remember thier respective sizes!&lt;/li>' +
+                        '&lt;li>' + iScrlUp + ' &lt;b>Scroll Up:&lt;/b> One full page (only in scroll mode).&lt;/li>' +
+                        '&lt;li>' + iScrlDn + ' &lt;b>Scroll Down:&lt;/b> One full page (only in scroll mode).&lt;/li>' +
+                        '&lt;li>' + iAutoScroll + ' &lt;b>Auto Scroll:&lt;/b> Scroll to the last line as they come.&lt;/li>' +
+                        '&lt;/ul>' +
+                        '&lt;li>&lt;b>OTHER BUTTONS:&lt;/b>&lt;/li>' +
+                        '&lt;ul>' +
+                        '&lt;li>' + iClear + ' &lt;b>Clear:&lt;/b> Clears the contents of the ouput window.&lt;/li>' +
+                        '&lt;li>' + iTogLoc + ' Toggle location: Toggle location for all lines.' +
+                        ' changes as window size changes).&lt;/li>' +
+                        '&lt;li>' + iHelp + ' &lt;b>Help:&lt;/b> You are here.&lt;/li>' +
+                        '&lt;/ul>' +
+                        '&lt;li>&lt;b>CSS:&lt;/b>&lt;/li>' +
+                        '&lt;ul>' +
+                        '&lt;li>Style colors and whatnot with css.' +
+                        '&lt;/ul>'
                     )
 
                 }
@@ -669,7 +697,7 @@ var iDebugConsole = function() {
             })
 
             function dynamicScroll() {
-                if ((difY > 1 || difY < -1)) {
+                if ((difY > 1 || difY &lt; -1)) {
                     ele.scrollTop = ele.scrollTop + difY * -1
                     difY = difY * .92
                     scrollFrame = requestAnimationFrame(dynamicScroll);
@@ -706,7 +734,7 @@ var iDebugConsole = function() {
                 var consoleW = (window.outerWidth - window.innerWidth - extraWidth)
                 consoleW = consoleW > 10 ? consoleW : window.innerWidth
                 var filler = (consoleW / consoleCharWidth) - (m.message.length + m.loc.length)
-                while (spaceStr.length < filler) {
+                while (spaceStr.length &lt; filler) {
                     spaceStr += " "
                 }
                 // apply to console
@@ -769,7 +797,7 @@ var iDebugConsole = function() {
 
             // prepare stack
             for (var s in loc.stack)
-                stack += "--> " + loc.stack[s] + "<br>"
+                stack += "--> " + loc.stack[s] + "&lt;br>"
 
             return {level: level, message: message, stack: stack, loc: loc}
         }
@@ -840,7 +868,7 @@ var iDebugConsole = function() {
             // remove internal
             stackA = stackA.slice(index)
             // create stackA if not available
-            if (!(stackA.length && stackA[0])) {
+            if (!(stackA.length &amp;&amp; stackA[0])) {
                 var currentFunction = arguments.callee;
                 while (currentFunction) {
                     var fn = currentFunction.toString();
@@ -888,7 +916,7 @@ var iDebugConsole = function() {
      * @param options.active {object} [true]            - Active / inactive state, overrides group state for one instance
      *
      *
-     * @example <caption>Profile a function:</caption>
+     * @example &lt;caption>Profile a function:&lt;/caption>
      * // You can instantiate the Profiler anyplace within the function's scope.
      * // The syntax must be in the form: functionName = new Profiler(functionName);
      * functionA = new Profiler(functionA);
@@ -897,7 +925,7 @@ var iDebugConsole = function() {
      * }
      * // Note: functionA.profile will contain the Profiler instance.
      *
-     * example <caption>Profile a function expression:</caption>
+     * example &lt;caption>Profile a function expression:&lt;/caption>
      * // Profiler must instantiated be after the function expression.
      * var MyCalss = functionA(){
      *     // The class constructor will be profiled
@@ -905,12 +933,12 @@ var iDebugConsole = function() {
      * MyClass = new Profiler(MyClass);
      * MyClass.prototype.myMethod = function(){}
      *
-     * @example <caption>Toggle all profilers on or off:</caption>
+     * @example &lt;caption>Toggle all profilers on or off:&lt;/caption>
      * // A the top of your file set the global group to true (on) or false (off)
      * // Setting global = off will disable all custom groups as well.
      * Profiler.groups.global = false
      *
-     * @example <caption>How to use custom groups:</caption>
+     * @example &lt;caption>How to use custom groups:&lt;/caption>
      * // Create a profiler with a custom group
      * functionB = new Profiler(functionB, {group:"profileGroup1"});
      * // You can dynamically change groups at runtime
@@ -918,12 +946,12 @@ var iDebugConsole = function() {
      * // You can toggle custom groups the same way we did for "global"
      * Profiler.groups.profileGroup1 = false
      *
-     * @example <caption>Create an inactive function Profiler:</caption>
+     * @example &lt;caption>Create an inactive function Profiler:&lt;/caption>
      * var functionC_profile = new Profiler(functionC, {group:"profileGroup1", active:false});
      * // You can dynamically activate at runtime
      * functionB.profile.active(false);
      *
-     * @example <caption>Use Profiler as stop watch:</caption>
+     * @example &lt;caption>Use Profiler as stop watch:&lt;/caption>
      * var siteTimer = new Profiler('site wide load timer');
      * siteTimer.start('int first component');
      * // do timed stuff here..
@@ -968,7 +996,7 @@ var iDebugConsole = function() {
         this.active(options.active);
         this.results = [];
         this.performance = options.performance === false ? false : !!window.performance;
-        this.useTable = console.table && options.table && !/MSIE|Edge/i.test(navigator.userAgent)
+        this.useTable = console.table &amp;&amp; options.table &amp;&amp; !/MSIE|Edge/i.test(navigator.userAgent)
 
         return this._initPrototype(objectToTime);
 
@@ -1024,7 +1052,7 @@ var iDebugConsole = function() {
                 if (typeof overide != "boolean") throw "Profiler.active must be a boolean value.";
                 this._active = overide;
             }
-            return this._active && Profiler.groups[this._group];
+            return this._active &amp;&amp; Profiler.groups[this._group];
         }
 
         function decorate(objectToTime) {
@@ -1106,8 +1134,8 @@ var iDebugConsole = function() {
                 var name = result.name
 
                 // Don't use generic names as name
-                if(name && name.indexOf('function')==0) name = ''
-                else if(name && name.indexOf('Unnamed timer')==0) name = ''
+                if(name &amp;&amp; name.indexOf('function')==0) name = ''
+                else if(name &amp;&amp; name.indexOf('Unnamed timer')==0) name = ''
                 else if(name == this.prevName) name = ''
                 if(name) name = ' '+name
 
@@ -1186,3 +1214,26 @@ debug('iDebugger ready: You can now use `debug` just like you would use `console
 
 
 
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="iDebugConsole.Debugger.html">Debugger</a></li><li><a href="iDebugConsole.DebuggerView.html">DebuggerView</a></li><li><a href="iDebugConsole.Profiler.html">Profiler</a></li></ul><h3>Namespaces</h3><ul><li><a href="iDebugConsole.html">iDebugConsole</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Jan 26 2016 01:00:51 GMT-0500 (Eastern Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
