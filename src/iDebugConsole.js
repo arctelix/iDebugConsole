@@ -1,13 +1,13 @@
 /**
  * @namespace
- * @description This package provides debugging and profiling tools.  The primary purpose is to provide a means for 
- * controlling console output globally and within closures as required.  An optional output window is provided as well.  
+ * @description This package provides debugging and profiling tools.  The primary purpose is to provide a means for
+ * controlling console output globally and within closures as required.  An optional output window is provided as well.
  * This is helpful for devices without a console window or when you do not require the full feature set of the native
  * browser consoles.  Finally a handy profiler for profiling javascript code execution and individual components.
  * All that utility at just 0.309kb minified in a production environment and under 12kb minified in development.
  *
- * An instance of the Debugger called `iDebugger` and the global debug method called `debug` are available after loading 
- * iDebugConsole.js.  Use the debug method exactly how you would use console except that debug() may be called directly 
+ * An instance of the Debugger called `iDebugger` and the global debug method called `debug` are available after loading
+ * iDebugConsole.js.  Use the debug method exactly how you would use console except that debug() may be called directly
  * as a shortcut to `debug.log()`. Each Debugger instance provide independent control over the closure it is assigned to.
  *
  * @author Simplex Studio, LTD
@@ -107,12 +107,45 @@ var iDebugConsole = function() {
      *
      *    NOTE:: Alternatively just copy the contents of iDebugDummy.js and paste into the top of your javascript.
      *
-     * @description 
-	 * Add this class to any closure to provide control over the console output of debug data witin that closure. 
+     * @description
+	 * Add this class to any closure to provide control over the console output of debug data witin that closure.
 	 * All objects specified will have a debug() method created automagically.
      *
-     * @param   {object}    objects         - Specify included objects as {key:object} pairs.
-     * @param   {boolean}   [state=false]   - Initial debug output state for all objects true=on false=off.
+     * @param {object} objects
+     * Specify included objects as {objectName:object} pairs.
+     *
+     * @param {boolean} state [false]
+     * Initial debug output state for all objects true=on false=off.
+     *
+     * @param {object} options
+     * An object containing valid options.
+     *
+     * @param {bool} options.prefixConsole [true]
+     * Prepend the prefix to console output.
+     *
+     * @param {bool} options.prefixOverlay [true]
+     * Prepend the prefix to on screen overlay output.
+     * > NOT IMPLEMENTED YET
+     *
+     * @param {bool} options.prefixObjectName [true]
+     * Use the specified objectName in the prefix
+     *
+     * @param {bool} options.prefixFunctionName [true]
+     * Use the calling function name in the prefix
+     * (only available when using the view).
+     *
+     * @param {bool} options.prefixInstanceId ['name']
+     * Use the object name in the prefix. Specify an object property as a
+     * string to use a property other than "name".
+     *
+     * @param {bool} options.prefixInstanceProps [[]]
+     * An array of object properties to be available in the output.
+     * > ONLY OUTPUT IN CONSOLE FOR NOW
+     *
+     * @param {bool} options.locationProps [["loc.file", "loc.func", "loc.line", "loc.col"]]
+     * Alter the location properties to output. See {@link LogLocation} for all avalable properties.
+     * > NOT IMPLEMENTED YET
+     *
      *
      * @example <caption>Instantiate a Debugger within a class for class level control.</caption>
      * function MyClass (){
@@ -134,7 +167,7 @@ var iDebugConsole = function() {
      * //turn off the MyClass.model debugger only
      * myClass.iDebug.off('model')
      */
-    function Debugger(objects, state) {
+    function Debugger(objects, state, options) {
         //TODO: auto recognise model, view, ctrl from self object
         /**
          * The objects to debug as {key:value} pairs.  The key should
@@ -143,7 +176,7 @@ var iDebugConsole = function() {
          * @private
          */
         this._objects = objects;
-
+        this.options = options || {}
         // init debugger
         this.init(state);
     }
@@ -151,19 +184,40 @@ var iDebugConsole = function() {
 
         // Class variables & methods
 
+        // Console supports string formatting
+        var consoleSFSupport = !(/MSIE|Edge/i.test(navigator.userAgent))
+
         //Tracks all debugger objects for global control.
         var allDebuggers = []
+
         //Tracks the global debug state.
         var globalDebug = window.iDebugMode !== undefined ? window.iDebugMode : false
+
         //The console view.
         var view = false
+
+        /**
+         * Global options
+         * @type {{}}
+         * @memberof Debugger
+         */
+        var globalOptions = {
+            prefixConsole:true,
+            prefixOverlay:true,
+            prefixObjectName:true,
+            prefixFunctionName:true,
+            prefixInstanceId:'id',
+            prefixInstanceProps:[],
+            locationProps:["loc.file", "loc.func", "loc.line", "loc.col"]
+        }
+
 
         /**
          * Sets and gets the global debug state.
          * @param state {boolean} - Toggle the global debug state.
          * @memberof Debugger
          */
-        var global = function (state) {
+        var globalState = function (state) {
             if (state)
                 globalDebug = state
             else
@@ -181,17 +235,43 @@ var iDebugConsole = function() {
          * @private
          */
         function init(state) {
-            if (!state && state !== false) console.log('You have not supplied a debug state for', this._objects)
+
+            if (state === undefined) console.log('You have not supplied a debug state for', this._objects)
+            allDebuggers = []
+            // Instance option overrides
+            setOptions(this.options, this.options)
+
             setState.call(this, state);
 
             for (var key in this._objects) {
                 var obj = this._objects[key]
+                obj._debugObjectName = key
+                obj.iDebugger = this
                 allDebuggers.push(obj)
-                obj.debug = debug.call(obj);
-                for (var f in console)
-                    if (typeof console[f] == 'function')
-                        obj.debug[f] = debug.call(obj, f);
+                obj.debug = debug.call(obj, undefined, this.options);
+                for (var level in console)
+                    if (typeof console[level] == 'function')
+                        obj.debug[level] = debug.call(obj, level, this.options);
             }
+        }
+
+        /**
+         * Sets instance or global options using globalOptions as the default values
+         * @param newOptions {object} New option values
+         * @param optionsToSet {object} [globalOptions]
+         */
+        function setOptions(newOptions, optionsToSet){
+            optionsToSet = optionsToSet || globalOptions
+
+            // Allow instanceName = true to use default
+            newOptions.prefixInstanceId = newOptions.prefixInstanceId === true ?
+                globalOptions.prefixInstanceId : newOptions.prefixInstanceId
+
+            for (var o in globalOptions) {
+                var newVal = newOptions[o]
+                optionsToSet[o] = newVal !== undefined ? newVal : globalOptions[o]
+            }
+
         }
 
         /**
@@ -200,8 +280,10 @@ var iDebugConsole = function() {
          * @param options
          * @memberof Debugger
          */
-        function initView(state, options) {
-            view = new DebuggerView(state, options)
+        function initView(state, options){
+            view = new DebuggerView(this, state, options)
+            for (var i in allDebuggers)
+                init.call(allDebuggers[i].iDebugger, allDebuggers[i].iDebugger.state())
         }
 
         /**
@@ -249,6 +331,8 @@ var iDebugConsole = function() {
                 this._objects[key]._debug = state;
             else {
                 for (var k in this._objects) {
+                    if (typeof state !== 'boolean')
+                        state = state[k]
                     // create private var for each object
                     this._objects[k]._debug = state;
                 }
@@ -265,14 +349,22 @@ var iDebugConsole = function() {
          * @memberof Debugger
          * @private
          */
-        function debug(level) {
+        function debug(level, options) {
+            // this is the object calling debug
             level = level || "log"
             if (!globalDebug || !this._debug)
                 return function () {};
+
             if (view)
-                return view.output.bind(this, level)
-            return console[level].bind(window.console, arguments)
+                return view.output.bind(this, level, options)
+
+            if (!options.prefixConsole)
+                return console[level].bind(window.console)
+
+            var prefix = getPrefixArgs(arguments, this)
+            return console[level].bind.apply(window.console[level], [window.console].concat(prefix.prefixArray, prefix.msgArray))
         }
+
 
         /**
          * Returns the debug state of all included objects as an object.
@@ -289,13 +381,78 @@ var iDebugConsole = function() {
             return result
         }
 
+        /**
+         * Returns an array where the first index will be the prefix string.  The second index
+         * will be and object containing any options.prefixInstanceProps. The third index will
+         * be and array of the original args concatenated with the prefix and prefixInstanceProps
+         * object.
+         * @param args {arguments} Must include level & options arguments
+         * @param caller {object} The calling object
+         * @param loc {LogLocation}
+         * @returns {object} {prefixArray:[], propObject:{} || null, msgArray:[]}
+         * @private
+         */
+        function getPrefixArgs(args, caller, loc){
+            loc = loc || {func:''}
+
+            args = Array.prototype.slice.call(args, 0)
+            var level = args.shift()
+            var options = args.shift()
+
+            var instanceObj = getPropsFromArrayOfStrings(options.prefixInstanceProps, caller)
+
+            // Create prefix
+            var prefixA = ['']
+            var prefix = ''
+            if (options.prefixObjectName)
+                prefix += caller._debugObjectName
+            if (options.prefixInstanceId) {
+                if (options.prefixObjectName) prefix += ': '
+                prefix += caller[options.prefixInstanceId] || 'no-id'
+            }
+            if (options.prefixFunctionName) {
+                if (options.prefixObjectName || options.prefixInstanceId) prefix += ' @ '
+                prefix += loc.func
+            }
+
+            if(prefix) prefix = prefix + ' -> '
+
+            // Add prefix to args with css when available
+            if (typeof args[0] == 'string')
+                if(consoleSFSupport) prefixA = ['%c'+prefix + '%c'+args.shift(), "font-style:italic;", "font-style:initial;"]
+                else prefixA = [prefix + args.shift()]
+            else
+                if(consoleSFSupport) prefixA = ['%c'+prefix , "font-style:italic;"]
+                else prefixA = [prefix]
+
+            return {prefixArray:prefixA, prefixObj:instanceObj?instanceObj:null, msgArray:args}
+        }
+
+        function getPropsFromArrayOfStrings(propsArray, object){
+            var out = propsArray.length ? {}:null
+            for (var i in propsArray) {
+                var prop = propsArray[i]
+                if (typeof prop !== 'string')
+                    throw ('iDebugError: " The location property ( ' + prop + ' ) must be specified as a string.')
+                out[prop] =  object[prop]
+            }
+            return out
+        }
+
+        /**
+         * Set global options.
+         * @method Debugger.globalOptions
+         */
+
         return {
             init: init,
             state: state,
             off: off,
             on: on,
-            global: global,
-            initView: initView
+            globalState: globalState,
+            initView: initView,
+            getPrefixArgs:getPrefixArgs,
+            setGlobalOptions:setOptions
         }
     }();
 
@@ -310,10 +467,12 @@ var iDebugConsole = function() {
      *                                      to test for iOS devices "ios".
      * @constructor
      */
-    var DebuggerView = function (state, options) {
+    var DebuggerView = function (model , state, options) {
+        this.model = model
         this.init(state, options)
     }
     DebuggerView.prototype = function () {
+
         // Start Output Window code
 
         // Output window class properties
@@ -361,34 +520,34 @@ var iDebugConsole = function() {
 
         var createView = function () {
             // elements
-            eCont = createEle("div", document.body, "#debug-cont")
+            eCont = createEle("div#debug-cont", document.body)
             eCont.style.width = initOpenW
             eCont.style.minWidth = closedSize
             eCont.style.height = initOpenH
             close() // sets the initial state open / close
-            eOpCont = createEle("div", eCont, ".op-cont")
-            eOutput = createEle("ol", eOpCont, ".output")
-            eOptions = createEle("div", eCont, ".options")
+            eOpCont = createEle("div.op-cont", eCont)
+            eOutput = createEle("ol.output", eOpCont)
+            eOptions = createEle("div.options", eCont)
             // buttons
-            bClose = createEle("div", eOptions, ".btn .btn-close " + iOpen)
-            bClear = createEle("div", eOptions, ".btn .btn-clear " + iClear)
+            bClose = createEle("div.btn.btn-close", eOptions, iOpen)
+            bClear = createEle("div.btn.btn-clear", eOptions, iClear)
             bClear.style.fontSize = "1.2em"
             bClear.style.marginTop = "-4px"
-            bScroll = createEle("div", eOptions, ".btn .btn-scroll " + iScroll)
-            bDrag = createEle("div", eOptions, ".btn .btn-drag " + iDrag)
+            bScroll = createEle("div.btn.btn-scroll", eOptions, iScroll)
+            bDrag = createEle("div.btn.btn-drag", eOptions, iDrag)
             bDrag.style.cursor = "move"
-            bScrollUp = createEle("div", eOptions, ".btn .btn-scroll-up " + iScrlUp)
+            bScrollUp = createEle("div.btn.btn-scroll-up", eOptions, iScrlUp)
             bScrollUp.style.display = "none"
-            bScrollDn = createEle("div", eOptions, ".btn .btn-scroll-dn " + iScrlDn)
+            bScrollDn = createEle("div.btn.btn-scroll-dn", eOptions, iScrlDn)
             bScrollDn.style.display = "none"
-            bAutoScroll = createEle("div", eOptions, ".btn .btn-autoscroll " + iAutoScroll)
+            bAutoScroll = createEle("div.btn.btn-autoscroll", eOptions, iAutoScroll)
             bAutoScroll.style.display = "none"
-            bSize = createEle("div", eOptions, ".btn .btn-size " + iSize)
+            bSize = createEle("div.btn.btn-size", eOptions, iSize)
             bSize.style.fontSize = "1.2em"
-            bTogLoc = createEle("div", eOptions, ".btn .btn-tog-loc " + iTogLoc)
+            bTogLoc = createEle("div.btn.btn-tog-loc", eOptions, iTogLoc)
             bTogLoc.style.fontSize = ".8em"
             //bTogLoc.style.verticalAlign = "middle"
-            bHelp = createEle("div", eOptions, ".btn .btn-help " + iHelp)
+            bHelp = createEle("div.btn.btn-help", eOptions, iHelp)
         }
 
         var clearView = function (html) {
@@ -459,7 +618,7 @@ var iDebugConsole = function() {
          * @private
          */
         var init = function (state, options) {
-            var globalDebug = Debugger.prototype.global()
+            var globalDebug = Debugger.prototype.globalState()
             // prevent view from init twice
             if (onScreen || !globalDebug)  return
 
@@ -472,7 +631,6 @@ var iDebugConsole = function() {
             if (options.test == 'ios')
                 options.test = /iPhone|iPod|iPad/i
 
-            console.log('TEST navigator', options.test)
             if (options.test)
                 if (!options.test.test(navigator.userAgent))
                     return
@@ -617,13 +775,19 @@ var iDebugConsole = function() {
                         if (!scrollMode) toggleScrollMode()
                         toggleClass(li.getElementsByClassName("stack"), "hide")
                     }
+                    // show message object
+                    if (hasClass(e.target, "msg-object-btn")) {
+                        console.log('clicked listener', e.target.target)
+                        var obj = document.getElementById(e.target.target)
+                        toggleClass(obj,'hide')
+                    }
                 }
             })
 
             // catch real errors and print to screen
-            window.onerror = function (message, url, line) {
-                var m = makeOutput.call(this, ['error', message], {url: url, line: line}, true)
-                printToScreen.call(this, m)
+            window.onerror = function (message, url, line, col, e) {
+                var loc = new LogLocation({url: url, line: line, col: col, error:e})
+                printToScreen('error', loc, [message], true)
                 return false;
             }.bind(this);
 
@@ -650,7 +814,6 @@ var iDebugConsole = function() {
                 var touch = e.touches[0]
                 prevY = touch.clientY
                 difY = null // stop scrolling
-                console.log(e.target)
             })
 
             ele.addEventListener("touchmove", function (e) {
@@ -683,105 +846,253 @@ var iDebugConsole = function() {
 
         /**
          * Writes debug message to debug window and console when using screen output.
-         * @param args  {arguments} - The arguments from previous function
-         * @param loc  {Location} - Determines console output level
+         * This function must be called using bind(caller, level)
+         * @param level  {string} - Console level
+         * @param options  {Debugger.options} - Options object
          * @returns {string}
          * @private
          */
-        function output(level) {
+        function output(level, options) {
+            // this = the object calling debug
+            var outputArgs = Array.prototype.slice.call(arguments, 0)
+            outputArgs.shift() // remove level
+            outputArgs.shift() // remove options
 
-            var args = Array.prototype.slice.call(arguments, 0)
+            var loc = new LogLocation()
 
-            var m = makeOutput(args)
+            // add prefix
+            var prefix
+            if (options.prefixConsole || options.prefixOverlay)
+                prefix = Debugger.prototype.getPrefixArgs(arguments, this, loc)
 
-            printToScreen(m)
+            // print to screen
+            if (options.prefixOverlay)
+                printToScreen(level, loc, prefix)
+            else
+               printToScreen(level, loc, outputArgs)
 
-            // this will write to console
+            // start write to console
+
+            // Select args for console and add location string
+            var consoleArgs = []
+            if (options.prefixConsole)
+                if(prefix.prefixObj)
+                    consoleArgs = consoleArgs.concat(prefix.prefixArray, prefix.prefixObj, prefix.msgArray)
+                else
+                    consoleArgs = consoleArgs.concat(prefix.prefixArray, prefix.msgArray)
+            else
+                consoleArgs = outputArgs
+
+            consoleArgs = consoleArgs.concat([loc.str])
             try {
-                // TODO: optimize for ie, firefox, opra
-                // determine console width in characters and add spaces to justify right
-                var spaceStr = ""
-                var extraWidth = 170       //scroll bar and anything else ie: browser line numbers
-                var consoleCharWidth = 7   // the width of console charicters in pixels
-                var consoleW = (window.outerWidth - window.innerWidth - extraWidth)
-                consoleW = consoleW > 10 ? consoleW : window.innerWidth
-                var filler = (consoleW / consoleCharWidth) - (m.message.length + m.loc.length)
-                while (spaceStr.length < filler) {
-                    spaceStr += " "
-                }
-                // apply to console
-                console[level].apply(window.console, args.concat([spaceStr + m.loc.loc]))
+                if (console[level])
+                    console[level].apply(window.console, consoleArgs)
+                else
+                    output.call(this, 'warn', options, 'The native console does not support "' + level + '"' + '!')
             } catch (e) {
-                output('error', '"' + level + '"' + ' is not a supported console function.')
+                // console does not exist, nothing needs to be done
             }
         }
 
         /**
-         * Prints debug message to screen
-         * @param outputObject  {object} - The output project ot print
-         * @returns {string}
+         * Appends debug statement to screen overlay as HTML
          * @private
+         * @param level {string} The console level
+         * @param loc {LogLocation}
+         * @param msgArgs {Array|object} Array of message args or prefix object.
+         * @param [noescape=false] {bool} Do not html escape the output args.
          */
-        function printToScreen(outputObject) {
-            var m = outputObject
-            // create li element and append
-            var e = createEle("li", eOutput, "." + m.level)
-            e.className = m.level
-            var eM = createEle("div", e, ".message")
-            var eLevel = createEle("i", eM, ".level")
-            eLevel.innerHTML = m.level + " "
-            var eSB = createEle("i", eM, ".btn-stack " + iStack + " ")
-            eSB.style.fontSize = "1.1em"
+        function printToScreen(level, loc, inputArgs, noescape){
+            var prefix, message, parts,
+                stack = '',
+                objects = [],
+                prefixObj = inputArgs.prefixObj
+
+            if (inputArgs.prefixArray){
+                inputArgs.prefixArray.push(prefixObj)
+                parts = formatArgs(inputArgs.prefixArray, noescape)
+                prefix = parts[0]
+                objects = parts[1]
+                inputArgs = inputArgs.msgArray
+            }
+
+            parts = formatArgs(inputArgs , noescape)
+            message = parts[0]
+            objects = objects.concat(parts[1])
+
+            // prepare stack
+            for (var s in loc.stack)
+                stack += "--> " + loc.stack[s] + "<br>"
+
+            // create li element and message
+            var e = createEle("li."+ level, eOutput)
+            e.className = level
+            var eMsg = createEle("div.message", e)
+            // add ICONS
+            var eLevel = createEle("i.level", eMsg)
+            eLevel.innerHTML = level + " "
+            var eStackB = createEle("i.btn-stack", eMsg, iStack + " ")
+            eStackB.style.fontSize = "1.1em"
             //eSB.style.verticalAlign= "middle"
-            var eLB = createEle("i", eM, ".btn-location " + iLoc)
-            eLB.style.fontSize = ".8em"
-            eLB.style.verticalAlign = "middle"
-            var eLoc = createEle("span", eM, ".loc .hide")
-            eLoc.innerHTML = m.loc + " "
-            var eText = createEle("span", eM, ": " + m.message)
-            var eStack = createEle("div", e, ".stack .hide")
-            eStack.innerHTML = m.stack
+            var eLocB = createEle("i.btn-location", eMsg, iLoc)
+            eLocB.style.fontSize = ".8em"
+            eLocB.style.verticalAlign = "middle"
+            // Hidden location
+            var eLoc = createEle("span.loc.hide", eMsg)
+            eLoc.innerHTML = loc.longStr + " "
+            createEle("span", eMsg, ': ')
+            // add message & prefix
+            if(prefix) {
+                createEle("span.msg-prefix", eMsg, prefix)
+            }
+            var eText = createEle("span.msg-text", eMsg)
+            eText.innerHTML =  message
+            // Add objects
+            for (var i in objects)
+                e.appendChild(objects[i])
+            var eStack = createEle("div.stack.hide", e, stack)
 
             // auto scroll to bottom
             if (autoScroll)
                 eOpCont.scrollTop = eOpCont.scrollHeight
         }
 
-        /**
-         * Creates an output object.
-         * @param args  {Array} First arg must be level, all other args are converted to message text.
-         * @param loc {Object} Any valid LogLocation options to use.
-         * @param noescape {bool} HTML Escape message
-         * @returns {{level: string, message: string, stack: string, loc: LogLocation}}
-         * @private
-         */
-        function makeOutput(args, loc, noescape) {
-            var level = args.shift()
-            var message = ''
-            var stack = ''
-            loc = new LogLocation(loc)
+        // old solution only handles %c and no objects
+        function argsToString(outputArgs, noescape){
+            // Apply css style as required
+            var cssText = []
+            if (!outputArgs.length) return ''
+            outputArgs = Array.prototype.slice.call(outputArgs, 0)
+            if (typeof outputArgs[0] === 'string')
+                cssText = outputArgs[0].split('%c')
+            if (cssText.length >= 1) {
+                outputArgs.shift()
+                for (var i in cssText)
+                    if (i !== '0') //index 0 will never be css styled
+                        cssText[i] = '<span style="' + outputArgs.shift() + '">' + (noescape ? cssText[i] : escapeHtml(cssText[i])) + '</span>'
+            }
 
             // prepare message
-            for (var i in args)
-                message += args[i] + " "
+            var message = ''
+            for (var i in outputArgs)
+                message += outputArgs[i] + " "
             if (!noescape)
                 message = escapeHtml(message)
-
-            // prepare stack
-            for (var s in loc.stack)
-                stack += "--> " + loc.stack[s] + "<br>"
-
-            return {level: level, message: message, stack: stack, loc: loc}
+            return cssText.join('') + message
         }
+
+        function objectToList(obj, id){
+            var ele = createEle("ul#"+id+'.hide')
+            for (var p in obj || []) {
+                var value = obj[p]
+                var valueName = (typeof value === 'function' ? 'function()' :
+                    value == null ? null : value.toString())
+                var li = createEle("li", ele, p + ' : ' + valueName)
+                if (typeof value !== "object" || value == null) continue
+                var objId = id + '_' + p
+                li.id = objId
+                li.innerHTML = p + ' : '
+                var a = createEle("a", li)
+                a.innerHTML = value.toString()
+                a.onclick = function (obj, id, e) {
+                    e.stopPropagation()
+                    console.log('clicked:', e.target.target)
+                    console.log('appendTo:', e.target.parentElement)
+                    var ele = objectToList(obj, id+'_obj')
+                    console.log('new ele:', ele)
+                    e.target.parentElement.appendChild(ele)
+                    toggleClass(ele, 'hide')
+                }.bind(this, value, objId)
+            }
+            ele.onclick = function(cont, e){
+                toggleClass(cont, 'hide')
+            }.bind(this, ele)
+            return ele
+        }
+
+        function formatArgs(outputArgs, noescape) {
+            // prepare message
+            outputArgs = compileStrFormats(outputArgs, noescape)
+            var message = '', objects = []
+            for (var i in outputArgs) {
+                var arg = outputArgs[i]
+                if (!arg) continue // usefull ?
+                if (typeof arg === 'string')
+                    message += (noescape? arg : escapeHtml(arg)) + ' '
+                else if (arg instanceof HTMLSafeString)
+                    message += arg.safe + ' '
+                else {
+                    var id = 'msg-object-'+Date.now()
+                    var ele = objectToList(arg, id)
+                    message += '<br><a target="%s" class="msg-object-btn">%s</a><br>'.format(id, arg)
+                    objects.push(ele)
+                }
+            }
+            return [message, objects]
+        }
+
+        function compileStrFormats(outputArgs, noescape){
+            // Make a copy since were going to mutate them
+            outputArgs = outputArgs.slice(0)
+            var str = outputArgs[0]
+            if(typeof str !== 'string') return outputArgs
+
+            // Remove confirmed formatted string or return args
+            var markers = /%s|%c/g
+            var foundMarkers = str.match(markers)
+            if(foundMarkers) outputArgs.shift()
+            else return outputArgs
+
+            // Remove all outputArgs assigned to markers
+            var fArgs = []
+            for (var i in foundMarkers)
+                fArgs.push(outputArgs.shift())
+
+            // Apply formatting
+            var marker, segHtml, seg, arg
+            var segments = str.split(markers)
+            var firstSeg = segments.shift()
+            var htmlSegs = [noescape ? firstSeg : escapeHtml(firstSeg)]
+            var isCss = false
+            for (var i in segments) {
+                i = parseInt(i)
+                marker = foundMarkers[i]
+                seg = segments[i]
+                arg = fArgs[i]
+                segHtml = noescape ? seg : escapeHtml(seg)
+                if (marker == '%s') {
+                    segments[i] = arg + seg
+                    htmlSegs[i+1] = (noescape ? arg : escapeHtml(arg)) + segHtml
+                }
+                else if (marker == '%c') {
+                    if(isCss) htmlSegs[i+1] = '</span>'
+                    else htmlSegs[i+1] = ''
+                    htmlSegs[i+1] += '<span style="' + arg + '">' + segHtml
+                    segments[i] = seg
+                    isCss = true
+                }
+            }
+            if (isCss) htmlSegs[i+1] += '</span>'
+            outputArgs.unshift(new HTMLSafeString(htmlSegs.join(''), firstSeg+segments.join('')))
+            return outputArgs
+        }
+
+        sFormat = compileStrFormats
+
+        function HTMLSafeString(safe, unsafe){
+            this.safe = safe
+            this.unsafe = unsafe
+        }
+        HTMLSafeString.prototype.__proto__ = String.prototype
+        HTMLSafeString.prototype.toString = function(){return this.safe}
+        HTMLSafeString.prototype.valueOf = function(){return this.safe}
 
         return {
             init: init,
             open: open,
             close: close,
-            output: output
+            output: output,
         }
-
-
     }()
 
     /**
@@ -791,42 +1102,50 @@ var iDebugConsole = function() {
      * @param options.url {string}      - Use when the debug url known.
      * @param options.line {string}     - Use when the debug line is known.
      * @param options.offset {integer}  - offset the baseIndex (determines where to slice a constructed stack)
+     * @param options.caller {object}  - The calling object
      * @constructor
      * @private
      */
     var LogLocation = function (options) {
         options = options !== undefined ? options : {}
+        this.options = options
         this.stack = []
         this.url = options.url
-        this.loc = ''
         this.path = ''
         this.file = ''
         this.line = options.line
-        this.col = ''
+        this.col = options.col
         this.str = ''
+        this.longStr = ''
+        this.caller = options.caller
+        this.func = ''
+        this.error = options.error
 
-        try {
-            var e = new Error()
-            throw e
-        } catch (error) {
-            e = error
-        }
+        if(!this.error)
+            try {
+                var e = new Error()
+                throw e
+            } catch (error) {
+                this.error =  error
+            }
 
-        this.init(e, options.offset)
+        this.init(this.error, options.offset)
     }
     LogLocation.prototype = function () {
-        var baseIndex = 4
+        var baseIndex = 3
 
         function init(e, offset) {
             this.stack = getStack(e, offset)
-            this.url = this.url || e.url || this.stack[0] || "?"
-            var loc = locFromUrl(this.url)
-            this.path = loc.path
-            this.file = loc.file || "?"
-            this.line = this.line || loc.line || e.line || e.lineNumber || "?"
-            this.col = loc.col || e.column || ""
+            var url = this.url || e.url || this.stack[0] || "?"
+            var urlLoc = locFromUrl(url)
+            this.url = urlLoc.url
+            this.func = this.caller && this.caller.name ?  this.caller.name : urlLoc.func || "anonymous"
+            this.file = urlLoc.file || "?"
+            this.line = this.line || urlLoc.line || e.line || e.lineNumber || "?"
+            this.col = this.col || urlLoc.col || e.column || "?"
             var str = [this.file, this.line, this.col].join(':')
-            this.str = this.loc = "(" + str + ")"
+            this.str = "(" + str + ")"
+            this.longStr = "(" + this.func + '@' +  str + ")"
         }
 
         function toString() {
@@ -844,7 +1163,7 @@ var iDebugConsole = function() {
                 var currentFunction = arguments.callee;
                 while (currentFunction) {
                     var fn = currentFunction.toString();
-                    var fname = fn.match(/function\s(\w+?)\s*\(/) || ["", "anonymous"];
+                    var fname = currentFunction.name || fn.match(/function\s(\w+?)\s*\(/) || ["", "anonymous"];
                     stackA.push(fname[1]);
                     currentFunction = currentFunction.callee;
                 }
@@ -854,18 +1173,32 @@ var iDebugConsole = function() {
             return stackA
         }
 
-        function locFromUrl(url) {
-            var parts = url.split('/') || []
-
-            var loc = parts.pop().replace(')', '')
-                .replace('(', '')
-            var path = parts.join("/")
-            var locL = loc.split(':') || []
+        function locFromUrl(rawUrl) {
+            // safari rawUrl "funcName@proto://domain:port/path/to/file.ext:line:col"
+            // chrome rawUrl "    at Object.funcName (proto://domain:port/path/to/file.ext:line:col)"
+            var cleanUrl = rawUrl.trim().replace(/[@()]/g, '')
+            var proto = cleanUrl.match(/http:|https:|ftp:/) || '';
+            var urlSplit = cleanUrl.split(proto[0]) || ''
+            var func = urlSplit[0].replace(/at |Object\.|<anonymous>/g, '')
+            var url = [proto,urlSplit[1]].join('')
+            var locA, urlA, location
+            if (url) {
+                urlA = url.split('/') || ''
+                location = urlA.length ? urlA.pop() : ''
+                locA = location.split(':')
+            // For direct console input
+            }else{
+                locA = func.split(':')
+                locA[0] = 'console'
+                func = func.replace(/:\d:\d+/g, '')
+            }
             return {
-                line: locL[1],
-                col: locL[2],
-                file: locL[0],
-                path: path
+                raw: rawUrl,
+                line: locA[1],
+                col: locA[2],
+                file: locA[0],
+                func: func,
+                url: url
             }
         }
 
