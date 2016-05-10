@@ -12,6 +12,9 @@ components.
 All that utility at just 0.309kb minified in a production environment and under 12kb minified 
 in development.
 
+#### Demo http://codepen.io/arctelix/pen/PNLZGO
+Keep in mind the codepen demo will not show the correct line numbers, but your documents will
+
 #### Requirements:
 If you want to use the output window, the .js files from the folowing repos are required: 
 
