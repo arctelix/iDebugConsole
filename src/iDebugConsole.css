@@ -140,6 +140,7 @@
     font-weight: normal;
     font-family: Helvetica, Arial, sans-serif;
     vertical-align: inherit;
+    display: inline-block;
  }
 
 #debug-cont .btn.off{
