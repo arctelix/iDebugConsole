@@ -11,9 +11,10 @@
     pointer-events: none;
     display: block;/* border-box is required when border is used */
     box-sizing: border-box;
-    border: 3px solid rgba(84, 84, 84, 0.8);
+    border: 3px solid rgba(0, 0, 0, 0.5);
     font-size: 12pt;
     background: none;
+    font-family: arial, helvetica, monospace;
 }
     #debug-cont.scroll {
         /* min-width: 311px; */
@@ -52,7 +53,7 @@
     /* margin: 5px; */
     width: 100%;
     height: auto;
-    background-color: rgba(84, 84, 84, 0.8);
+    background-color: rgba(0, 0, 0, 0.5);
     overflow: hidden;
     pointer-events: none;
 }

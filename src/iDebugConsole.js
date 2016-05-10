@@ -643,8 +643,12 @@ var iDebugConsole = function() {
             eOptions.addEventListener("click", function (e) {
                 e.preventDefault()
 
+                console.log("click:", e.target)
+                console.log("btn-help clicked", isClicked(e.target, 'btn-help'))
+                console.log("btn-close clicked", isClicked(e.target, 'btn-close'))
+
                 // disable buttons in help mode
-                if (!isClicked(e, 'btn-help') && hasClass(bHelp, 'active'))
+                if (!hasClass(e.target, 'btn-help') && hasClass(bHelp, 'active'))
                     return
                 // close
                 if (hasClass(e.target, 'btn-close')) {
@@ -693,7 +697,8 @@ var iDebugConsole = function() {
 
                 }
                 // help
-                else if (isClicked(e, 'btn-help')) {
+                else if (hasClass(e.target, 'btn-help')) {
+                    console.log("clicked help")
                     var state = toggleClass(bHelp, 'active')
                     if (state) {
                         drs.snapFullScreen()

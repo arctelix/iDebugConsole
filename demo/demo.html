@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../src/iDebugConsole.css" />
+    <style>
+        /* temp fix untill cdn updates */
+        html, body{
+          width:100%;
+          height:100%;
+          background-image: url("https://newevolutiondesigns.com/images/freebies/space-wallpaper-3.jpg");
+          background-size: cover;
+        }
+
+        #debug-cont .btn {
+          display: inline-block;
+        }
+
+        .hide {
+          display: none;
+        }
+    </style>
+
+</head>
+<body>
+<script src="https://gitcdn.xyz/repo/arctelix/vanillaHelper/master/dist/vanillaHelper.js"></script>
+<script src="https://gitcdn.xyz/repo/arctelix/drag-resize-snap/master/drs.js"></script>
+<script language="javascript">window.iDebugMode=true</script>
+<script src="../src/iDebugConsole.js"></script>
+
+<script language="javascript">
+    iDebugger.initView('open');
+    debug.log("This is a log message")
+    debug.warn("This is a warn message")
+    debug.info("This is a info message")
+    this_is_an_actual_error
+</script>
+</body>
+</html>
