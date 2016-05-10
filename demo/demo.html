@@ -5,20 +5,11 @@
     <title></title>
     <link rel="stylesheet" type="text/css" href="../src/iDebugConsole.css" />
     <style>
-        /* temp fix untill cdn updates */
         html, body{
           width:100%;
           height:100%;
           background-image: url("https://newevolutiondesigns.com/images/freebies/space-wallpaper-3.jpg");
           background-size: cover;
-        }
-
-        #debug-cont .btn {
-          display: inline-block;
-        }
-
-        .hide {
-          display: none;
         }
     </style>
 
@@ -30,11 +21,32 @@
 <script src="../src/iDebugConsole.js"></script>
 
 <script language="javascript">
+
+    //These are the default option values, shown for informational purposes
+    var options={
+        prefixConsole:true,
+        prefixOverlay:false,
+        prefixObjectName:false,
+        prefixFunctionName:false,
+        prefixInstanceId:'id',
+        prefixInstanceProps:[],
+        locationProps:["loc.file", "loc.func", "loc.line", "loc.col"]
+    }
+
+    // Set options for existing instance
+    iDebugger.setOptions(options)
+
+    // Change default options for all future instances
+    iDebugConsole.Debugger.prototype.setOptions(options)
+
+    // Initialize the view in the open state
     iDebugger.initView('open');
+
     debug.log("This is a log message")
     debug.warn("This is a warn message")
     debug.info("This is a info message")
     this_is_an_actual_error
+
 </script>
 </body>
 </html>

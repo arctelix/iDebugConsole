@@ -54,7 +54,7 @@ var iDebugConsole = function() {
      *      this.debug('This will not be output to the console')
      *
      *      // Turn on global debugging
-     *      iDebugger.global(true)
+     *      iDebugger.globalState(true)
      *
      *      // Global debugging my be controlled via the Debugger prototype as well
      *      Debugger.prototype.global(true)
@@ -109,7 +109,7 @@ var iDebugConsole = function() {
      *
      * @description
 	 * Add this class to any closure to provide control over the console output of debug data witin that closure.
-	 * All objects specified will have a debug() method created automagically.
+	 * All objects specified will have a debug() method created automatically.
      *
      * @param {object} objects
      * Specify included objects as {objectName:object} pairs.
@@ -203,9 +203,9 @@ var iDebugConsole = function() {
          */
         var globalOptions = {
             prefixConsole:true,
-            prefixOverlay:true,
-            prefixObjectName:true,
-            prefixFunctionName:true,
+            prefixOverlay:false,
+            prefixObjectName:false,
+            prefixFunctionName:false,
             prefixInstanceId:'id',
             prefixInstanceProps:[],
             locationProps:["loc.file", "loc.func", "loc.line", "loc.col"]
@@ -236,9 +236,10 @@ var iDebugConsole = function() {
          */
         function init(state) {
 
-            if (state === undefined) console.log('You have not supplied a debug state for', this._objects)
+            if (state === undefined) console.error('You have not supplied a debug state for', this._objects)
             allDebuggers = []
             // Instance option overrides
+
             setOptions(this.options, this.options)
 
             setState.call(this, state);
@@ -258,10 +259,13 @@ var iDebugConsole = function() {
         /**
          * Sets instance or global options using globalOptions as the default values
          * @param newOptions {object} New option values
-         * @param optionsToSet {object} [globalOptions]
+         * @param optionsToSet {object} [this.options || globalOptions]
+         * ex: Set global options: Debugger.setOptions()
+         * ex: Set instance options: iDebugger.setOptions({},"default")
          */
         function setOptions(newOptions, optionsToSet){
-            optionsToSet = optionsToSet || globalOptions
+            optionsToSet = optionsToSet == "default" ? globalOptions : optionsToSet
+            optionsToSet = optionsToSet || this.options || globalOptions
 
             // Allow instanceName = true to use default
             newOptions.prefixInstanceId = newOptions.prefixInstanceId === true ?
@@ -271,7 +275,6 @@ var iDebugConsole = function() {
                 var newVal = newOptions[o]
                 optionsToSet[o] = newVal !== undefined ? newVal : globalOptions[o]
             }
-
         }
 
         /**
@@ -441,7 +444,7 @@ var iDebugConsole = function() {
 
         /**
          * Set global options.
-         * @method Debugger.globalOptions
+         * @method Debugger.setOptions
          */
 
         return {
@@ -452,7 +455,7 @@ var iDebugConsole = function() {
             globalState: globalState,
             initView: initView,
             getPrefixArgs:getPrefixArgs,
-            setGlobalOptions:setOptions
+            setOptions:setOptions
         }
     }();
 
@@ -643,10 +646,6 @@ var iDebugConsole = function() {
             eOptions.addEventListener("click", function (e) {
                 e.preventDefault()
 
-                console.log("click:", e.target)
-                console.log("btn-help clicked", isClicked(e.target, 'btn-help'))
-                console.log("btn-close clicked", isClicked(e.target, 'btn-close'))
-
                 // disable buttons in help mode
                 if (!hasClass(e.target, 'btn-help') && hasClass(bHelp, 'active'))
                     return
@@ -698,7 +697,7 @@ var iDebugConsole = function() {
                 }
                 // help
                 else if (hasClass(e.target, 'btn-help')) {
-                    console.log("clicked help")
+
                     var state = toggleClass(bHelp, 'active')
                     if (state) {
                         drs.snapFullScreen()
@@ -782,7 +781,6 @@ var iDebugConsole = function() {
                     }
                     // show message object
                     if (hasClass(e.target, "msg-object-btn")) {
-                        console.log('clicked listener', e.target.target)
                         var obj = document.getElementById(e.target.target)
                         toggleClass(obj,'hide')
                     }
@@ -1001,10 +999,7 @@ var iDebugConsole = function() {
                 a.innerHTML = value.toString()
                 a.onclick = function (obj, id, e) {
                     e.stopPropagation()
-                    console.log('clicked:', e.target.target)
-                    console.log('appendTo:', e.target.parentElement)
                     var ele = objectToList(obj, id+'_obj')
-                    console.log('new ele:', ele)
                     e.target.parentElement.appendChild(ele)
                     toggleClass(ele, 'hide')
                 }.bind(this, value, objId)
@@ -1519,6 +1514,7 @@ var iDebugConsole = function() {
 }()
 
 // create a debugger for the root scope
+console.log("-- init window.iDebugger")
 window.iDebugger = new iDebugConsole.Debugger({window: this}, true)
 debug('iDebugger ready: You can now use `debug` just like you would use `console`.')
 
