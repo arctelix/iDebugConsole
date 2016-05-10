@@ -164,3 +164,7 @@
 #debug-cont li.error {
     color: rgb(255, 70, 70);
 }
+
+.hide {
+  display:none;
+}
