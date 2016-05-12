@@ -108,7 +108,7 @@ var iDebugConsole = function() {
      *    NOTE:: Alternatively just copy the contents of iDebugDummy.js and paste into the top of your javascript.
      *
      * @description
-	 * Add this class to any closure to provide control over the console output of debug data witin that closure.
+	 * Add this class to any closure to provide control over the console output of debug data within that closure.
 	 * All objects specified will have a debug() method created automatically.
      *
      * @param {object} objects
@@ -119,6 +119,11 @@ var iDebugConsole = function() {
      *
      * @param {object} options
      * An object containing valid options.
+     *
+     * @param {bool} options.callback [true]
+     * A callback function to be executed on all calls to debug.
+     * Receives the debug level called and the location object.
+     * function(level,loc)
      *
      * @param {bool} options.prefixConsole [true]
      * Prepend the prefix to console output.
@@ -138,7 +143,7 @@ var iDebugConsole = function() {
      * Use the object name in the prefix. Specify an object property as a
      * string to use a property other than "name".
      *
-     * @param {bool} options.prefixInstanceProps [[]]
+     * @param {bool} options.addInstanceProps [[]]
      * An array of object properties to be available in the output.
      * > ONLY OUTPUT IN CONSOLE FOR NOW
      *
@@ -176,8 +181,12 @@ var iDebugConsole = function() {
          * @private
          */
         this._objects = objects;
-        this.options = options || {}
+        this._unique_options = options || {}
+        // Unique and default options
+        this.options = {}
+
         // init debugger
+        this.setOptions.call(this, this._unique_options)
         this.init(state);
     }
     Debugger.prototype = function () {
@@ -202,12 +211,13 @@ var iDebugConsole = function() {
          * @memberof Debugger
          */
         var globalOptions = {
+            callback:undefined,
             prefixConsole:true,
             prefixOverlay:false,
             prefixObjectName:false,
             prefixFunctionName:false,
-            prefixInstanceId:'id',
-            prefixInstanceProps:[],
+            prefixInstanceId:false,
+            addInstanceProps:[],
             locationProps:["loc.file", "loc.func", "loc.line", "loc.col"]
         }
 
@@ -231,16 +241,15 @@ var iDebugConsole = function() {
          * this.debug(), this.debug.log(), this.debug.info(), this.debug.warn(),
          * and this.debug.error() to each included object with it's own context.
          * @param state {boolean} - Initial debug state for all objects.
+         * @param update {boolean} - Only update output
          * @memberof Debugger
          * @private
          */
-        function init(state) {
+        function init(state, update) {
 
             if (state === undefined) console.error('You have not supplied a debug state for', this._objects)
-            allDebuggers = []
+            //allDebuggers = []
             // Instance option overrides
-
-            setOptions(this.options, this.options)
 
             setState.call(this, state);
 
@@ -248,7 +257,9 @@ var iDebugConsole = function() {
                 var obj = this._objects[key]
                 obj._debugObjectName = key
                 obj.iDebugger = this
-                allDebuggers.push(obj)
+                // only push instance on first init
+                if (!update)
+                    allDebuggers.push(obj)
                 obj.debug = debug.call(obj, undefined, this.options);
                 for (var level in console)
                     if (typeof console[level] == 'function')
@@ -257,25 +268,38 @@ var iDebugConsole = function() {
         }
 
         /**
-         * Sets instance or global options using globalOptions as the default values
+         * Sets instance options or global options using globalOptions as the default values
          * @param newOptions {object} New option values
-         * @param optionsToSet {object} [this.options || globalOptions]
-         * ex: Set global options: Debugger.setOptions()
-         * ex: Set instance options: iDebugger.setOptions({},"default")
+         * @param optionsToSet {object} [this.options] Alternately provide globalOptions object
          */
         function setOptions(newOptions, optionsToSet){
-            optionsToSet = optionsToSet == "default" ? globalOptions : optionsToSet
-            optionsToSet = optionsToSet || this.options || globalOptions
+            optionsToSet = optionsToSet || this.options
+            newOptions = newOptions || {}
 
-            // Allow instanceName = true to use default
+            //console.log("setting options for",this._objects,  optionsToSet, globalOptions)
+
+            // Allow options.instanceId = true to use 'id' as property
             newOptions.prefixInstanceId = newOptions.prefixInstanceId === true ?
-                globalOptions.prefixInstanceId : newOptions.prefixInstanceId
+                'id' : newOptions.prefixInstanceId
 
             for (var o in globalOptions) {
                 var newVal = newOptions[o]
                 optionsToSet[o] = newVal !== undefined ? newVal : globalOptions[o]
             }
         }
+
+        /**
+         * Sets Global options (for all instances) using globalOptions as the default values
+         * @param newOptions {object} New option values
+         */
+        function setGlobalOptions(newOptions){
+            setOptions(newOptions, globalOptions)
+            // re-init all debuggers to pickup changes in global options
+            for (var i in allDebuggers)
+                setOptions.call(allDebuggers[i].iDebugger)
+                init.call(allDebuggers[i].iDebugger, allDebuggers[i].iDebugger.state(), "update")
+        }
+
 
         /**
          * Initialize the console view.
@@ -285,8 +309,9 @@ var iDebugConsole = function() {
          */
         function initView(state, options){
             view = new DebuggerView(this, state, options)
+            // Reinitialize all debuggers to direct to view output
             for (var i in allDebuggers)
-                init.call(allDebuggers[i].iDebugger, allDebuggers[i].iDebugger.state())
+                init.call(allDebuggers[i].iDebugger, allDebuggers[i].iDebugger.state(), "update")
         }
 
         /**
@@ -358,8 +383,11 @@ var iDebugConsole = function() {
             if (!globalDebug || !this._debug)
                 return function () {};
 
-            if (view)
-                return view.output.bind(this, level, options)
+            // When a callback is specified we must use output
+            if (view || options.callback){
+                options.toScreen = view
+                return DebuggerView.prototype.output.bind(this, level, options)
+            }
 
             if (!options.prefixConsole)
                 return console[level].bind(window.console)
@@ -386,8 +414,8 @@ var iDebugConsole = function() {
 
         /**
          * Returns an array where the first index will be the prefix string.  The second index
-         * will be and object containing any options.prefixInstanceProps. The third index will
-         * be and array of the original args concatenated with the prefix and prefixInstanceProps
+         * will be and object containing any options.addInstanceProps. The third index will
+         * be and array of the original args concatenated with the prefix and addInstanceProps
          * object.
          * @param args {arguments} Must include level & options arguments
          * @param caller {object} The calling object
@@ -402,7 +430,7 @@ var iDebugConsole = function() {
             var level = args.shift()
             var options = args.shift()
 
-            var instanceObj = getPropsFromArrayOfStrings(options.prefixInstanceProps, caller)
+            var instanceObj = getPropsFromArrayOfStrings(options.addInstanceProps, caller)
 
             // Create prefix
             var prefixA = ['']
@@ -455,7 +483,8 @@ var iDebugConsole = function() {
             globalState: globalState,
             initView: initView,
             getPrefixArgs:getPrefixArgs,
-            setOptions:setOptions
+            setOptions:setOptions,
+            setGlobalOptions:setGlobalOptions
         }
     }();
 
@@ -852,6 +881,7 @@ var iDebugConsole = function() {
          * This function must be called using bind(caller, level)
          * @param level  {string} - Console level
          * @param options  {Debugger.options} - Options object
+         * @param options.toScreen - undefined or true prints to debugger overlay
          * @returns {string}
          * @private
          */
@@ -869,10 +899,12 @@ var iDebugConsole = function() {
                 prefix = Debugger.prototype.getPrefixArgs(arguments, this, loc)
 
             // print to screen
-            if (options.prefixOverlay)
-                printToScreen(level, loc, prefix)
-            else
-               printToScreen(level, loc, outputArgs)
+            if (options.toScreen !== false) {
+                if (options.prefixOverlay)
+                    printToScreen(level, loc, prefix)
+                else
+                    printToScreen(level, loc, outputArgs)
+            }
 
             // start write to console
 
@@ -894,6 +926,10 @@ var iDebugConsole = function() {
                     output.call(this, 'warn', options, 'The native console does not support "' + level + '"' + '!')
             } catch (e) {
                 // console does not exist, nothing needs to be done
+            }
+
+            if (options.callback){
+                options.callback.call(this, level, loc)
             }
         }
 
@@ -960,30 +996,6 @@ var iDebugConsole = function() {
                 eOpCont.scrollTop = eOpCont.scrollHeight
         }
 
-        // old solution only handles %c and no objects
-        function argsToString(outputArgs, noescape){
-            // Apply css style as required
-            var cssText = []
-            if (!outputArgs.length) return ''
-            outputArgs = Array.prototype.slice.call(outputArgs, 0)
-            if (typeof outputArgs[0] === 'string')
-                cssText = outputArgs[0].split('%c')
-            if (cssText.length >= 1) {
-                outputArgs.shift()
-                for (var i in cssText)
-                    if (i !== '0') //index 0 will never be css styled
-                        cssText[i] = '<span style="' + outputArgs.shift() + '">' + (noescape ? cssText[i] : escapeHtml(cssText[i])) + '</span>'
-            }
-
-            // prepare message
-            var message = ''
-            for (var i in outputArgs)
-                message += outputArgs[i] + " "
-            if (!noescape)
-                message = escapeHtml(message)
-            return cssText.join('') + message
-        }
-
         function objectToList(obj, id){
             var ele = createEle("ul#"+id+'.hide')
             for (var p in obj || []) {
@@ -995,18 +1007,18 @@ var iDebugConsole = function() {
                 var objId = id + '_' + p
                 li.id = objId
                 li.innerHTML = p + ' : '
-                var a = createEle("a", li)
+                var a = createEle("a.msg-object-btn", li)
                 a.innerHTML = value.toString()
                 a.onclick = function (obj, id, e) {
                     e.stopPropagation()
-                    var ele = objectToList(obj, id+'_obj')
-                    e.target.parentElement.appendChild(ele)
-                    toggleClass(ele, 'hide')
+                    id=id+'_obj'
+                    var list_ele=document.getElementById(id)
+                    if (!list_ele)
+                        list_ele = objectToList(obj, id)
+                        e.target.parentElement.appendChild(list_ele)
+                    toggleClass(list_ele, 'hide')
                 }.bind(this, value, objId)
             }
-            ele.onclick = function(cont, e){
-                toggleClass(cont, 'hide')
-            }.bind(this, ele)
             return ele
         }
 
@@ -1177,7 +1189,7 @@ var iDebugConsole = function() {
             // safari rawUrl "funcName@proto://domain:port/path/to/file.ext:line:col"
             // chrome rawUrl "    at Object.funcName (proto://domain:port/path/to/file.ext:line:col)"
             var cleanUrl = rawUrl.trim().replace(/[@()]/g, '')
-            var proto = cleanUrl.match(/http:|https:|ftp:/) || '';
+            var proto = cleanUrl.match(/http:|https:|ftp:|file:/) || '';
             var urlSplit = cleanUrl.split(proto[0]) || ''
             var func = urlSplit[0].replace(/at |Object\.|<anonymous>/g, '')
             var url = [proto,urlSplit[1]].join('')

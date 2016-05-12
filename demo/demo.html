@@ -22,30 +22,106 @@
 
 <script language="javascript">
 
-    //These are the default option values, shown for informational purposes
-    var options={
-        prefixConsole:true,
-        prefixOverlay:false,
-        prefixObjectName:false,
-        prefixFunctionName:false,
-        prefixInstanceId:'id',
-        prefixInstanceProps:[],
-        locationProps:["loc.file", "loc.func", "loc.line", "loc.col"]
-    }
 
-    // Set options for existing instance
+
+    debug.log("This normal log message, the view and all options are off")
+
+    // Set some options
+    var options={
+        prefixObjectName:true,
+        prefixFunctionName:true,
+    }
     iDebugger.setOptions(options)
 
-    // Change default options for all future instances
-    iDebugConsole.Debugger.prototype.setOptions(options)
+    // demo the closure prefixes
+
+    function demoWarnFunc () {
+        debug.info("This is a log message with current object & function name")
+    }
+
+    function demoInfoFunc () {
+        debug.info("This is a log message with current object & function name")
+    }
+
+    demoWarnFunc()
+    demoInfoFunc()
 
     // Initialize the view in the open state
     iDebugger.initView('open');
 
-    debug.log("This is a log message")
-    debug.warn("This is a warn message")
-    debug.info("This is a info message")
-    this_is_an_actual_error
+
+    debug.log("Now the view is activated")
+    debug.log("Click the &#8801; to reveal the stack trace")
+    debug.log("Click the @ to reveal the location")
+
+
+    // Lets turn on some global options (all debuggers)
+    var options={
+        prefixOverlay:true,
+        prefixObjectName:true,
+        prefixFunctionName:true,
+        prefixInstanceId:true,
+    }
+    iDebugger.setGlobalOptions(options)
+
+
+    // demo classes
+
+    DemoGuy=function(name, lastname){
+        this.debugger = new iDebugConsole.Debugger({DemoGuy: this}, true, {
+            addInstanceProps:['name', 'lastName']
+        })
+        this.id="id:421"
+        this.name=name
+        this.lastName=lastname
+        this.debug.warn("Created a new DemoGuy named "+this.name)
+    }
+    DemoGuy.prototype.speak = function(words){this.debug.info(words)}
+
+    var jimmy = new DemoGuy("Jimmy", "Roark")
+    jimmy.speak("The Object, instance id, and function")
+    jimmy.speak("name are shown for each call to debug.")
+
+    DemoDog=function(name, lastname){
+        this.debugger = new iDebugConsole.Debugger({DemoDog: this}, true, {
+            addInstanceProps:['name', 'tricks']
+        })
+        this.id="605"
+        this.name=name
+        this.tricks={rollover:5, sit:8, speak:10}
+        this.debug.warn("Created a new DemoDog named "+this.name)
+    }
+
+    DemoDog.prototype.bark = function(words){this.debug.info(words)}
+    var dog = new DemoDog("Boomer", "Dog")
+    dog.bark("You can include any instance properties you like")
+    dog.bark("Click an object to expand it's properties.")
+
+
+
+    // Let's add a global call back
+    iDebugger.setOptions({
+        callback:function(level, loc) {
+            if (level == "log")
+                console.debug("This is a callback for debug." + level, loc)
+            else if (level == "info")
+                console.debug("This is a callback for debug." + level, loc)
+            else if (level == "warn")
+                console.debug("This is a callback for debug." + level, loc)
+        }
+    })
+
+    debug.log("You can add a call back too")
+    debug.info("You can add a call back too")
+    debug.warn("You can add a call back too")
+
+
+    // now lets throw an actual error, it works in the view as well!
+    DEMO_OF_AN_ERROR
+
+
+
+
 
 </script>
 </body>

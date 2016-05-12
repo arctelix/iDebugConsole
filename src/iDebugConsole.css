@@ -91,7 +91,7 @@
     /* height: 100%; */
     /* background-color: rgba(84, 84, 84, 0.8); */
     color: rgb(160,206,27);
-    width: 100%;
+    /*width: 100%;*/
     /* min-width: 300px; */
     min-height: 50px;
     list-style-type: decimal-leading-zero;
@@ -100,7 +100,8 @@
     margin: 0;
     overflow: hidden;
 }
-#debug-cont .output li i{
+#debug-cont .output li i,
+#debug-cont .output .msg-object-btn{
     pointer-events: all;
     cursor: pointer;
     vertical-align: text-top;
