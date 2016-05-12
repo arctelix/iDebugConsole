@@ -68,9 +68,7 @@
     // demo classes
 
     DemoGuy=function(name, lastname){
-        this.debugger = new iDebugConsole.Debugger({DemoGuy: this}, true, {
-            addInstanceProps:['name', 'lastName']
-        })
+        this.debugger = new iDebugConsole.Debugger({DemoGuy: this}, true)
         this.id="id:421"
         this.name=name
         this.lastName=lastname
@@ -79,10 +77,10 @@
     DemoGuy.prototype.speak = function(words){this.debug.info(words)}
 
     var jimmy = new DemoGuy("Jimmy", "Roark")
-    jimmy.speak("The Object, instance id, and function")
-    jimmy.speak("name are shown for each call to debug.")
+    jimmy.speak("The Object, instance id, and function name are shown for each call to debug.")
 
     DemoDog=function(name, lastname){
+        // Add some instance properties to the output for DemoDog
         this.debugger = new iDebugConsole.Debugger({DemoDog: this}, true, {
             addInstanceProps:['name', 'tricks']
         })
@@ -95,31 +93,23 @@
     DemoDog.prototype.bark = function(words){this.debug.info(words)}
     var dog = new DemoDog("Boomer", "Dog")
     dog.bark("You can include any instance properties you like")
-    dog.bark("Click an object to expand it's properties.")
+    dog.bark("Click [object Object] to see the properties")
 
 
 
     // Let's add a global call back
     iDebugger.setOptions({
         callback:function(level, loc) {
-            if (level == "log")
-                console.debug("This is a callback for debug." + level, loc)
-            else if (level == "info")
-                console.debug("This is a callback for debug." + level, loc)
-            else if (level == "warn")
-                console.debug("This is a callback for debug." + level, loc)
+            setTimeout(function(){
+                alert("This is a demo of iDebugConsole's callback option triggered by debug." + level
+                    + " from line number " + loc.line +" in the file "+loc.file )}, 3000)
         }
     })
 
-    debug.log("You can add a call back too")
-    debug.info("You can add a call back too")
-    debug.warn("You can add a call back too")
-
+    debug.info("You can add a call back too, the alert was triggered ny this call to debug.info")
 
     // now lets throw an actual error, it works in the view as well!
-    DEMO_OF_AN_ERROR
-
-
+    THIS_IS_A_DEMO_OF_AN_ERROR
 
 
 
