@@ -96,7 +96,7 @@
     min-height: 50px;
     list-style-type: decimal-leading-zero;
     list-style-position: outside;
-    /* padding: 0 7px; */
+    padding: 0 34px;
     margin: 0;
     overflow: hidden;
 }
