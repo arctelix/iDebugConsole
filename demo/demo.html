@@ -20,13 +20,25 @@
 <script language="javascript">window.iDebugMode=true</script>
 <script src="../src/iDebugConsole.js"></script>
 
+<div style="width:400px">
+    This is a demonstration for iDebugConsole.<br>
+    <ul>
+    <li>The overlay window is draggable from the side bar and resizeable from the edges.</li>
+    <li>The default view passes all events through to your site as to not interfere with navigation.</li>
+    <li>Now click the scroll icon (&#8645;) to activate scrolling.</li>
+    <li>Press the help icon (&#9764;) for more a full description of all the controls.</li>
+    </ul>
+    If your browsers console is not open, do so now.<br>
+    This demo shows you how to control the data displayed in both the built in console and the iDebugger overlay console.
+    Compare the output of both windows as you review the code in the demo.html file.
+</div>
+
 <script language="javascript">
 
+    debug.log("When no options are elected and the view is not used, " +
+            "you get a typical console message like this.")
 
-
-    debug.log("This normal log message, the view and all options are off")
-
-    // Set some options
+    // Set some options for the existing iDebugger instance(only)
     var options={
         prefixObjectName:true,
         prefixFunctionName:true,
@@ -36,11 +48,12 @@
     // demo the closure prefixes
 
     function demoWarnFunc () {
-        debug.info("This is a log message with current object & function name")
+        debug.info("Now we turned on prefixObjectName and prefixFunctionName, " +
+                "you can see this info is prefixed to each debug call")
     }
 
     function demoInfoFunc () {
-        debug.info("This is a log message with current object & function name")
+        debug.info("Now you need to refer to the suffixed origin data.")
     }
 
     demoWarnFunc()
@@ -50,19 +63,19 @@
     iDebugger.initView('open');
 
 
-    debug.log("Now the view is activated")
-    debug.log("Click the &#8801; to reveal the stack trace")
-    debug.log("Click the @ to reveal the location")
+    debug.log("Now the iDebugger overlay console is activated, but we have not turned on prefixes for the overlay window yet")
 
-
-    // Lets turn on some global options (all debuggers)
-    var options={
+    // Lets turn on some global options (all existing & future debugger instances)
+    // Instances that have explicitly set these values will keep their values
+    iDebugger.setGlobalOptions({
         prefixOverlay:true,
         prefixObjectName:true,
         prefixFunctionName:true,
-        prefixInstanceId:true,
-    }
-    iDebugger.setGlobalOptions(options)
+        prefixInstanceId:true
+    })
+
+    debug.log("Now both the built in console window and the iDebugger overlay console window have the same prefixes")
+    debug.log("Click the icons on each output line in the overlay to reveal the stack trace and location data")
 
 
     // demo classes
@@ -102,11 +115,12 @@
         callback:function(level, loc) {
             setTimeout(function(){
                 alert("This is a demo of iDebugConsole's callback option triggered by debug." + level
-                    + " from line number " + loc.line +" in the file "+loc.file )}, 3000)
+                    + " from line number " + loc.line +" in the file "+loc.file )
+            }, 3000)
         }
     })
 
-    debug.info("You can add a call back too, the alert was triggered ny this call to debug.info")
+    debug.info("You can add a call back to debug. The alert window was triggered ny this call to debug.info")
 
     // now lets throw an actual error, it works in the view as well!
     THIS_IS_A_DEMO_OF_AN_ERROR
