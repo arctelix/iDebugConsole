@@ -32,10 +32,84 @@
             <span class="ancestors"><a href="iDebugConsole.html">iDebugConsole</a>.</span>Debugger</h2>
         
             <div class="class-description"><p>Debugger is the class responsible for controlling weather a debug statement is ignored, output to the
-browser console or iDebugConsole.  Debug output is disabled by default, enable output by setting window.iDebugMode
-= true/false prior to loading iDebugConsole.js.  This is especially useful when used with a back end framework such
-as django which supplies it's own debug flag.  To toggle the global debug flag use the global method of any
-Debugger instance or Debugger.prototype.</p></div>
+browser console or iDebugConsole.  An instance of Debugger is automatically created in the gloabl scope called
+<code>iDebugger</code> and it's corisponding global <code>debug</code> method.</p>
+<h3>The Global Debug Switch</h3><p>Debug output is disabled by default, enable output by setting <code>window.iDebugMode = true/false</code>
+prior to loading iDebugConsole.js.  This is especially useful when used with a back end framework such
+as django which supplies it's own debug flag.  To toggle the global debug flag use the <code>globalState</code> method of any
+Debugger instance or Debugger.prototype.</p>
+<h4>Enable debug output before loading.</h4><pre class="prettyprint source"><code>&lt;script language=&quot;javascript&quot;>window.iDebugMode=true&lt;/script>
+&lt;script src=&quot;js/iDebugConsole.js&quot;&quot;>&lt;/script></code></pre><h4>Enable debug output after loading.</h4><pre class="prettyprint source"><code>&lt;script src=&quot;js/iDebugConsole.js&quot;&quot;>&lt;/script>
+&lt;script language=&quot;javascript&quot;>
+
+    this.debug('This will not be output to the console')
+
+    // Turn on global debugging via the global iDebugger instance
+    iDebugger.globalState(true)
+
+    // Global debugging my be controlled via the Debugger prototype as well
+    Debugger.prototype.global(true)
+
+    this.debug('This will be output to the console')
+    this.debug.warn('It supports all valid console methods')
+&lt;/script></code></pre><h4>Use django to set the global debug state</h4><p>1) Make sure you have defined the flowing in your settings file</p>
+<pre class="prettyprint source"><code> # Enable the debug context processor:
+ TEMPLATE_CONTEXT_PROCESSORS = [
+     # django &lt; 1.8
+     django.core.context_processors.debug,
+     # django >= 1.8
+     django.template.context_processors.debug' ,
+ ]
+
+ INTERNAL_IPS = ('127.0.0.1',) # add ip addresses as required.</code></pre><p>2) In your HTML template file use the {{debug}} variable supplied by django's debug context processor
+   to set window.iDebugMode and then load iDebugConsole.</p>
+<pre class="prettyprint source"><code> # Allow django's debug mode to set the global debug switch
+ &lt;script language=&quot;javascript&quot;>window.iDebugMode={{ debug|lower }}&lt;/script>
+ &lt;script src=&quot;{% static &quot;js/iDebugConsole.js&quot; %}&quot;>&lt;/script>
+
+ # Alternatively, you can minimize iDebugConsole's footprint by using iDebugDummy.js when debugging is not required:
+ {% if debug %}
+     &lt;script language=&quot;javascript&quot;>window.iDebugMode=true&lt;/script>
+     &lt;script src=&quot;{% static &quot;js/iDebugConsole.js&quot; %}&quot;>&lt;/script>
+ {% else %}
+     &lt;script src=&quot;{% static &quot;js/iDebugDummy.js&quot; %}&quot;>&lt;/script>
+ {% endif %}</code></pre><h3>Overlay Window</h3><p>The iDebugConsole overlay window is disabled by default, output will be directed only to the native console window.
+Although the iDebugConsole window has a vary small feature set compared to the native console there are a few
+distinct advantages:</p>
+<ul>
+<li>It's faster.</li>
+<li>Embedded in your website on load.</li>
+<li>Each debug statement contains a stack trace.</li>
+<li>It does not reduce your device window size.</li>
+<li>It can be initialized in open or closed mode.</li>
+<li>It scales it's self to the device screen size.</li>
+<li>It can be dragged, resized, docked, or full screen on demand.</li>
+</ul>
+<p>Enable iDebugConsole output window</p>
+<pre class="prettyprint source"><code> &lt;head>
+     &lt;!-- Load Required css files -->
+     &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;css/iDebugConsole.css&quot; />
+ &lt;/head>
+ &lt;body>
+     &lt;!-- Load Required js files -->
+     &lt;script src=&quot;js/vanillaHelper.js&quot;>&lt;/script>
+     &lt;script src=&quot;js/dragResizeSnap.js&quot;>&lt;/script>
+     &lt;script src=&quot;js/iDebugConsole.js&quot;>&lt;/script>
+
+     &lt;!-- Enable overlay -->
+     &lt;script language=&quot;javascript&quot;>
+
+         // Enable the on screen output in closed mode (minimized).
+         iDebugger.initView('closed')
+
+         // Enable the on screen output window via the Debugger prototype
+         Debugger.prototype.initView('open')
+
+     &lt;/script>
+ &lt;/body></code></pre><blockquote>
+<p>When using the iDebugConsole output window, the output will also appear in the native browser console window,
+but the location data will show a Debugger location. Corrected location data will be injected into each debug statement.</p>
+</blockquote></div>
         
     
 </header>
@@ -49,15 +123,15 @@ Debugger instance or Debugger.prototype.</p></div>
     <h2>Constructor</h2>
     
 
-    <h4 class="name" id="Debugger"><span class="type-signature"></span>new Debugger<span class="signature">(objects, state<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Debugger"><span class="type-signature"></span>new Debugger<span class="signature">(objects, state, options)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Add this class to any closure to provide control over the console output of debug data witin that closure. 
-All objects specified will have a debug() method created automagically.</p>
+    <p>Add this class to any closure to provide control over the console output of debug data within that closure.
+All objects specified will have a debug() method created automatically.</p>
 </div>
 
 
@@ -81,11 +155,7 @@ All objects specified will have a debug() method created automagically.</p>
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
-        
-        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -110,22 +180,10 @@ All objects specified will have a debug() method created automagically.</p>
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
-                <td class="default">
-                
-                </td>
-            
 
-            <td class="description last"><p>Specify included objects as {key:object} pairs.</p></td>
+            <td class="description last"><p>Specify included objects as {objectName:object} pairs.</p></td>
         </tr>
 
     
@@ -145,26 +203,259 @@ All objects specified will have a debug() method created automagically.</p>
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
 
-                
+            
 
+            <td class="description last"><p>[false]
+Initial debug output state for all objects true=on false=off.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
                 
-                </td>
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
             
 
             
-                <td class="default">
+
+            <td class="description last"><p>An object containing valid options.</p>
+                <h6>Properties</h6>
                 
-                    false
-                
-                </td>
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
             
 
-            <td class="description last"><p>Initial debug output state for all objects true=on false=off.</p></td>
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>[true]
+A callback function to be executed on all calls to debug.
+Receives the debug level called and the location object.
+function(level,loc)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>prefixConsole</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>[true]
+Prepend a prefix to console output.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>prefixOverlay</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>[true]
+Prepend a prefix to overlay output.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>prefixObjectName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>[true]
+Use the specified objectName in the prefix</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>prefixFunctionName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>[true]
+Use the calling function name in the prefix
+(only available when using the view).</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>prefixInstanceId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>['name']
+Use the object name in the prefix. Specify an object property as a
+string to use a property other than &quot;name&quot;.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>addInstanceProps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>[[]]
+An array of object properties to be available in the output.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>locationProps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>[[&quot;loc.file&quot;, &quot;loc.func&quot;, &quot;loc.line&quot;, &quot;loc.col&quot;]]
+Alter the location properties to output. See LogLocation for all avalable properties.</p>
+<blockquote>
+<p>NOT IMPLEMENTED YET</p>
+</blockquote></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -205,7 +496,7 @@ All objects specified will have a debug() method created automagically.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="iDebugConsole.js.html">iDebugConsole.js</a>, <a href="iDebugConsole.js.html#line137">line 137</a>
+        <a href="iDebugConsole.js.html">iDebugConsole.js</a>, <a href="iDebugConsole.js.html#line207">line 207</a>
     </li></ul></dd>
     
 
@@ -232,33 +523,27 @@ All objects specified will have a debug() method created automagically.</p>
 
     <h5>Examples</h5>
     
-        <p class="code-caption">Enable debug output before loading.</p>
-    
-    <pre class="prettyprint"><code> &lt;script language="javascript">window.iDebugMode=true&lt;/script> &lt;script src="js/iDebugConsole.js"">&lt;/script></code></pre>
-
-        <p class="code-caption">Enable debug output after loading.</p>
-    
-    <pre class="prettyprint"><code> &lt;script src="js/iDebugConsole.js"">&lt;/script> &lt;script language="javascript">     this.debug('This will not be output to the console')     // Turn on global debugging     iDebugger.global(true)     // Global debugging my be controlled via the Debugger prototype as well     Debugger.prototype.global(true)     this.debug('This will be output to the console')     this.debug.warn('It supports all valid console methods')&lt;/script>The iDebugConsole window is disabled by default, output will be directed only to the native console window.Although the iDebugConsole window has a vary small feature set compared to the native console there are a fewdistinct advantages:- It's faster.- Embedded in your website on load.- Each debug statement contains a stack trace.- It does not reduce your device window size.- It can be initialized in open or closed mode.- It scales it's self to the device screen size.- It can be dragged, resized, docked, or full screen on demand.</code></pre>
-
-        <p class="code-caption">Enable iDebugConsole output window.</p>
-    
-    <pre class="prettyprint"><code> &lt;script language="javascript">     // Enable the on screen output in closed mode (minimized).     iDebugger.initView('closed')     // Enable the on screen output window via the Debugger prototype     Debugger.prototype.initView('open') &lt;/script>Note:: When using the iDebugConsole output window, the output will also appear in the native browser console window,but the location data will show a Debugger location. Corrected location data will be injected into each debug statement.</code></pre>
-
-        <p class="code-caption">Use django to set the global debug state</p>
-    
-    <pre class="prettyprint"><code>1) In your django settings file TEMPLATE_CONTEXT_PROCESSORS must contain the debug context processor:  'django.core.context_processors.debug' (django &lt; 1.8) or  'django.template.context_processors.debug' (django >= 1.8)2) Make sure you have defined the setting INTERNAL_IPS = ('127.0.0.1',) add ip addresses as required.3) In your HTML template file use the {{debug}} variable supplied by django's debug context processor   to set window.iDebugMode and load iDebugConsole.   {% if debug %}      &lt;script language="javascript">window.iDebugMode=true&lt;/script>   {% endif %}   &lt;script src="{% static "js/iDebugConsole.js" %}">&lt;/script></code></pre>
-
-        <p class="code-caption">Minimize iDebugConsole's footprint in production:</p>
-    
-    <pre class="prettyprint"><code>   {% if debug %}      &lt;script language="javascript">window.iDebugMode=true&lt;/script>      &lt;script src="{% static "js/iDebugConsole.js" %}">&lt;/script>   {% else %}     &lt;script src="{% static "js/iDebugDummy.js" %}">&lt;/script>   {% endif %}   NOTE:: Alternatively just copy the contents of iDebugDummy.js and paste into the top of your javascript.</code></pre>
-
         <p class="code-caption">Instantiate a Debugger within a class for class level control.</p>
     
-    <pre class="prettyprint"><code>function MyClass (){    var ctrl = new Controller    var model = new Model(ctrl)    var view = new View(ctrl, model)    this.iDebug = new iDebugConsole.Debugger({model:model, view:view, ctrl:ctrl}, true)    // use the debugger like this    this.debug('This is the same as calling console.log()')}</code></pre>
+    <pre class="prettyprint"><code>function MyClass (){
+    var ctrl = new Controller
+    var model = new Model(ctrl)
+    var view = new View(ctrl, model)
+    this.iDebug = new iDebugConsole.Debugger({model:model, view:view, ctrl:ctrl}, true)
+
+    // use the debugger like this
+    this.debug('This is the same as calling console.log()')
+}</code></pre>
 
         <p class="code-caption">Dynamically toggle debugging only for a specified closure.</p>
     
-    <pre class="prettyprint"><code>var myClass = new MyClass()//turn off the MyClass debuggermyClass.iDebug.off()//turn off the MyClass.model debugger onlymyClass.iDebug.off('model')</code></pre>
+    <pre class="prettyprint"><code>var myClass = new MyClass()
+
+//turn off the MyClass debugger
+myClass.iDebug.off()
+
+//turn off the MyClass.model debugger only
+myClass.iDebug.off('model')</code></pre>
 
 
 
@@ -292,13 +577,13 @@ All objects specified will have a debug() method created automagically.</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="iDebugConsole.Debugger.html">Debugger</a></li><li><a href="iDebugConsole.DebuggerView.html">DebuggerView</a></li><li><a href="iDebugConsole.Profiler.html">Profiler</a></li></ul><h3>Namespaces</h3><ul><li><a href="iDebugConsole.html">iDebugConsole</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="iDebugConsole.Debugger.html">Debugger</a></li><li><a href="iDebugConsole.DebuggerView.html">DebuggerView</a></li><li><a href="iDebugConsole.Profiler.html">Profiler</a></li></ul><h3>Namespaces</h3><ul><li><a href="iDebugConsole.html">iDebugConsole</a></li><li><a href="iDebugDummy.html">iDebugDummy</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-demo.html">demo</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Jan 26 2016 01:00:51 GMT-0500 (Eastern Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Sep 08 2016 23:14:43 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

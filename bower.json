@@ -1,0 +1,36 @@
+{
+  "name": "iDebugConsole",
+  "homepage": "https://github.com/arctelix/iDebugConsole",
+  "authors": [
+    "arctelix <arctelix@gmail.com>"
+  ],
+  "description": "A lightweight debug utility with an integrated console overlay and profiler.",
+  "main": [
+    "./dist/iDebugConsole.js",
+    "./dist/iDebugConsole.css"
+  ],
+  "moduleType": [],
+  "keywords": [
+    "debug",
+    "debugger",
+    "profiler",
+    "console",
+    "lightweight",
+    "minimal",
+    "micro"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "demo",
+    "docs"
+  ],
+  "dependencies": {
+    "vanillaHelper": "^0.1.5",
+    "drag-resize-snap": "^0.1.1"
+  }
+}

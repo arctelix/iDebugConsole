@@ -315,7 +315,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="iDebugConsole.js.html">iDebugConsole.js</a>, <a href="iDebugConsole.js.html#line941">line 941</a>
+        <a href="iDebugConsole.js.html">iDebugConsole.js</a>, <a href="iDebugConsole.js.html#line1345">line 1345</a>
     </li></ul></dd>
     
 
@@ -344,23 +344,57 @@
     
         <p class="code-caption">Profile a function:</p>
     
-    <pre class="prettyprint"><code>// You can instantiate the Profiler anyplace within the function's scope.// The syntax must be in the form: functionName = new Profiler(functionName);functionA = new Profiler(functionA);function functionA(){    //All this code will be profiled}// Note: functionA.profile will contain the Profiler instance.example &lt;caption>Profile a function expression:&lt;/caption>// Profiler must instantiated be after the function expression.var MyCalss = functionA(){    // The class constructor will be profiled}MyClass = new Profiler(MyClass);MyClass.prototype.myMethod = function(){}</code></pre>
+    <pre class="prettyprint"><code>// You can instantiate the Profiler anyplace within the function's scope.
+// The syntax must be in the form: functionName = new Profiler(functionName);
+functionA = new Profiler(functionA);
+function functionA(){
+    //All this code will be profiled
+}
+// Note: functionA.profile will contain the Profiler instance.
+
+example &lt;caption>Profile a function expression:&lt;/caption>
+// Profiler must instantiated be after the function expression.
+var MyCalss = functionA(){
+    // The class constructor will be profiled
+}
+MyClass = new Profiler(MyClass);
+MyClass.prototype.myMethod = function(){}</code></pre>
 
         <p class="code-caption">Toggle all profilers on or off:</p>
     
-    <pre class="prettyprint"><code>// A the top of your file set the global group to true (on) or false (off)// Setting global = off will disable all custom groups as well.Profiler.groups.global = false</code></pre>
+    <pre class="prettyprint"><code>// A the top of your file set the global group to true (on) or false (off)
+// Setting global = off will disable all custom groups as well.
+Profiler.groups.global = false</code></pre>
 
         <p class="code-caption">How to use custom groups:</p>
     
-    <pre class="prettyprint"><code>// Create a profiler with a custom groupfunctionB = new Profiler(functionB, {group:"profileGroup1"});// You can dynamically change groups at runtimefunctionB.profile.group("profileGroup2");// You can toggle custom groups the same way we did for "global"Profiler.groups.profileGroup1 = false</code></pre>
+    <pre class="prettyprint"><code>// Create a profiler with a custom group
+functionB = new Profiler(functionB, {group:"profileGroup1"});
+// You can dynamically change groups at runtime
+functionB.profile.group("profileGroup2");
+// You can toggle custom groups the same way we did for "global"
+Profiler.groups.profileGroup1 = false</code></pre>
 
         <p class="code-caption">Create an inactive function Profiler:</p>
     
-    <pre class="prettyprint"><code>var functionC_profile = new Profiler(functionC, {group:"profileGroup1", active:false});// You can dynamically activate at runtimefunctionB.profile.active(false);</code></pre>
+    <pre class="prettyprint"><code>var functionC_profile = new Profiler(functionC, {group:"profileGroup1", active:false});
+// You can dynamically activate at runtime
+functionB.profile.active(false);</code></pre>
 
         <p class="code-caption">Use Profiler as stop watch:</p>
     
-    <pre class="prettyprint"><code>var siteTimer = new Profiler('site wide load timer');siteTimer.start('int first component');// do timed stuff here..siteTimer.start('int second component');// Stop is called automatically when starting a new timed segmentsiteTimer.stop();// Stopping the timer allows you to do un-timed stuff here..siteTimer.start('int third component');// do more timed stuff here..siteTimer.stop();// Now print the results of the three timed segmentssiteTimer.printResults();</code></pre>
+    <pre class="prettyprint"><code>var siteTimer = new Profiler('site wide load timer');
+siteTimer.start('int first component');
+// do timed stuff here..
+siteTimer.start('int second component');
+// Stop is called automatically when starting a new timed segment
+siteTimer.stop();
+// Stopping the timer allows you to do un-timed stuff here..
+siteTimer.start('int third component');
+// do more timed stuff here..
+siteTimer.stop();
+// Now print the results of the three timed segments
+siteTimer.printResults();</code></pre>
 
 
 
@@ -394,13 +428,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="iDebugConsole.Debugger.html">Debugger</a></li><li><a href="iDebugConsole.DebuggerView.html">DebuggerView</a></li><li><a href="iDebugConsole.Profiler.html">Profiler</a></li></ul><h3>Namespaces</h3><ul><li><a href="iDebugConsole.html">iDebugConsole</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="iDebugConsole.Debugger.html">Debugger</a></li><li><a href="iDebugConsole.DebuggerView.html">DebuggerView</a></li><li><a href="iDebugConsole.Profiler.html">Profiler</a></li></ul><h3>Namespaces</h3><ul><li><a href="iDebugConsole.html">iDebugConsole</a></li><li><a href="iDebugDummy.html">iDebugDummy</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-demo.html">demo</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Jan 26 2016 01:00:51 GMT-0500 (Eastern Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Sep 08 2016 23:14:43 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

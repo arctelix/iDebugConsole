@@ -1,8 +1,11 @@
 /**
- * Created by Simplex Studio, LTD on 1/17/16.
+ * A dummy iDebugConsole class for production.
+ * @namespace iDebugDummy
+ * @author Simplex Studio, LTD
+ * @copyright Copyright (c) 2016 Simplex Studio, LTD
+ * @license The MIT License (MIT)
+ * Copyright (c) 2016 Simplex Studio, LTD
  */
-
-//dummy classes for when Debugger is not available
 var iDebugConsole = iDebugConsole || function() {
 
     var Debugger = function (objs) {

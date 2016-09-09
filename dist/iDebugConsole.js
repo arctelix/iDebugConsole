@@ -1,5 +1,5 @@
 /**
- * @namespace
+ * @namespace iDebugConsole
  * @description This package provides debugging and profiling tools.  The primary purpose is to provide a means for
  * controlling console output globally and within closures as required.  An optional output window is provided as well.
  * This is helpful for devices without a console window or when you do not require the full feature set of the native
@@ -8,8 +8,9 @@
  *
  * An instance of the Debugger called `iDebugger` and the global debug method called `debug` are available after loading
  * iDebugConsole.js.  Use the debug method exactly how you would use console except that debug() may be called directly
- * as a shortcut to `debug.log()`. Each Debugger instance provide independent control over the closure it is assigned to.
+ * as a shortcut to `debug.log()`. Each Debugger instance provides independent control over the closure it is assigned to.
  *
+ * @version 0.1.1
  * @author Simplex Studio, LTD
  * @copyright Copyright (c) 2016 Simplex Studio, LTD
  * @license The MIT License (MIT)
@@ -37,33 +38,72 @@ var iDebugConsole = function() {
 
     /**
 	 * @memberof iDebugConsole
-     * @class Debugger is the class responsible for controlling weather a debug statement is ignored, output to the
-     * browser console or iDebugConsole.  Debug output is disabled by default, enable output by setting window.iDebugMode
-     * = true/false prior to loading iDebugConsole.js.  This is especially useful when used with a back end framework such
-     * as django which supplies it's own debug flag.  To toggle the global debug flag use the global method of any
+     * @class
+     * @classdesc Debugger is the class responsible for controlling weather a debug statement is ignored, output to the
+     * browser console or iDebugConsole.  An instance of Debugger is automatically created in the gloabl scope called
+     * `iDebugger` and it's corisponding global `debug` method.
+     *
+     * ### The Global Debug Switch
+     *
+     * Debug output is disabled by default, enable output by setting `window.iDebugMode = true/false`
+     * prior to loading iDebugConsole.js.  This is especially useful when used with a back end framework such
+     * as django which supplies it's own debug flag.  To toggle the global debug flag use the `globalState` method of any
      * Debugger instance or Debugger.prototype.
      *
-     * @example <caption>Enable debug output before loading.</caption>
-     *  <script language="javascript">window.iDebugMode=true</script>
-     *  <script src="js/iDebugConsole.js""></script>
+     * #### Enable debug output before loading.
      *
-     * @example <caption>Enable debug output after loading.</caption>
-     *  <script src="js/iDebugConsole.js""></script>
-     *  <script language="javascript">
+     *     <script language="javascript">window.iDebugMode=true</script>
+     *     <script src="js/iDebugConsole.js""></script>
      *
-     *      this.debug('This will not be output to the console')
+     * #### Enable debug output after loading.
      *
-     *      // Turn on global debugging
-     *      iDebugger.globalState(true)
+     *     <script src="js/iDebugConsole.js""></script>
+     *     <script language="javascript">
      *
-     *      // Global debugging my be controlled via the Debugger prototype as well
-     *      Debugger.prototype.global(true)
+     *         this.debug('This will not be output to the console')
      *
-     *      this.debug('This will be output to the console')
-     *      this.debug.warn('It supports all valid console methods')
-     * </script>
+     *         // Turn on global debugging via the global iDebugger instance
+     *         iDebugger.globalState(true)
      *
-     * The iDebugConsole window is disabled by default, output will be directed only to the native console window.
+     *         // Global debugging my be controlled via the Debugger prototype as well
+     *         Debugger.prototype.global(true)
+     *
+     *         this.debug('This will be output to the console')
+     *         this.debug.warn('It supports all valid console methods')
+     *     </script>
+     *
+     * #### Use django to set the global debug state
+     *
+     * 1) Make sure you have defined the flowing in your settings file
+     *
+     *      # Enable the debug context processor:
+     *      TEMPLATE_CONTEXT_PROCESSORS = [
+     *          # django < 1.8
+     *          django.core.context_processors.debug,
+     *          # django >= 1.8
+     *          django.template.context_processors.debug' ,
+     *      ]
+     *
+     *      INTERNAL_IPS = ('127.0.0.1',) # add ip addresses as required.
+     *
+     * 2) In your HTML template file use the {{debug}} variable supplied by django's debug context processor
+     *    to set window.iDebugMode and then load iDebugConsole.
+     *
+     *      # Allow django's debug mode to set the global debug switch
+     *      <script language="javascript">window.iDebugMode={{ debug|lower }}</script>
+     *      <script src="{% static "js/iDebugConsole.js" %}"></script>
+     *
+     *      # Alternatively, you can minimize iDebugConsole's footprint by using iDebugDummy.js when debugging is not required:
+     *      {% if debug %}
+     *          <script language="javascript">window.iDebugMode=true</script>
+     *          <script src="{% static "js/iDebugConsole.js" %}"></script>
+     *      {% else %}
+     *          <script src="{% static "js/iDebugDummy.js" %}"></script>
+     *      {% endif %}
+     *
+     * ### Overlay Window
+     *
+     * The iDebugConsole overlay window is disabled by default, output will be directed only to the native console window.
      * Although the iDebugConsole window has a vary small feature set compared to the native console there are a few
      * distinct advantages:
      * - It's faster.
@@ -74,38 +114,32 @@ var iDebugConsole = function() {
      * - It scales it's self to the device screen size.
      * - It can be dragged, resized, docked, or full screen on demand.
      *
-     * @example <caption>Enable iDebugConsole output window.</caption>
-     *  <script language="javascript">
-     *      // Enable the on screen output in closed mode (minimized).
-     *      iDebugger.initView('closed')
-     *      // Enable the on screen output window via the Debugger prototype
-     *      Debugger.prototype.initView('open')
-     *  </script>
+     * Enable iDebugConsole output window
      *
-     * Note:: When using the iDebugConsole output window, the output will also appear in the native browser console window,
+     *      <head>
+     *          <!-- Load Required css files -->
+     *          <link rel="stylesheet" type="text/css" href="css/iDebugConsole.css" />
+     *      </head>
+     *      <body>
+     *          <!-- Load Required js files -->
+     *          <script src="js/vanillaHelper.js"></script>
+     *          <script src="js/dragResizeSnap.js"></script>
+     *          <script src="js/iDebugConsole.js"></script>
+     *
+     *          <!-- Enable overlay -->
+     *          <script language="javascript">
+     *
+     *              // Enable the on screen output in closed mode (minimized).
+     *              iDebugger.initView('closed')
+     *
+     *              // Enable the on screen output window via the Debugger prototype
+     *              Debugger.prototype.initView('open')
+     *
+     *          </script>
+     *      </body>
+     *
+     * > When using the iDebugConsole output window, the output will also appear in the native browser console window,
      * but the location data will show a Debugger location. Corrected location data will be injected into each debug statement.
-     *
-     * @example <caption>Use django to set the global debug state</caption>
-     * 1) In your django settings file TEMPLATE_CONTEXT_PROCESSORS must contain the debug context processor:
-     *   'django.core.context_processors.debug' (django < 1.8) or
-     *   'django.template.context_processors.debug' (django >= 1.8)
-     * 2) Make sure you have defined the setting INTERNAL_IPS = ('127.0.0.1',) add ip addresses as required.
-     * 3) In your HTML template file use the {{debug}} variable supplied by django's debug context processor
-     *    to set window.iDebugMode and load iDebugConsole.
-     *    {% if debug %}
-     *       <script language="javascript">window.iDebugMode=true</script>
-     *    {% endif %}
-     *    <script src="{% static "js/iDebugConsole.js" %}"></script>
-     *
-     * @example <caption>Minimize iDebugConsole's footprint in production:</caption>
-     *    {% if debug %}
-     *       <script language="javascript">window.iDebugMode=true</script>
-     *       <script src="{% static "js/iDebugConsole.js" %}"></script>
-     *    {% else %}
-     *      <script src="{% static "js/iDebugDummy.js" %}"></script>
-     *    {% endif %}
-     *
-     *    NOTE:: Alternatively just copy the contents of iDebugDummy.js and paste into the top of your javascript.
      *
      * @description
 	 * Add this class to any closure to provide control over the console output of debug data within that closure.
@@ -126,11 +160,10 @@ var iDebugConsole = function() {
      * function(level,loc)
      *
      * @param {bool} options.prefixConsole [true]
-     * Prepend the prefix to console output.
+     * Prepend a prefix to console output.
      *
      * @param {bool} options.prefixOverlay [true]
-     * Prepend the prefix to on screen overlay output.
-     * > NOT IMPLEMENTED YET
+     * Prepend a prefix to overlay output.
      *
      * @param {bool} options.prefixObjectName [true]
      * Use the specified objectName in the prefix
@@ -145,7 +178,6 @@ var iDebugConsole = function() {
      *
      * @param {bool} options.addInstanceProps [[]]
      * An array of object properties to be available in the output.
-     * > ONLY OUTPUT IN CONSOLE FOR NOW
      *
      * @param {bool} options.locationProps [["loc.file", "loc.func", "loc.line", "loc.col"]]
      * Alter the location properties to output. See {@link LogLocation} for all avalable properties.
@@ -276,7 +308,7 @@ var iDebugConsole = function() {
         function _setOptions(newOptions, optionsToSet){
             optionsToSet = optionsToSet || this.options || {}
             newOptions = newOptions || this.uniqueOptions || {}
-            
+
             var uniqueOptions = this.uniqueOptions || {}
 
             // Allow options.instanceId = true to use 'id' as property
@@ -695,11 +727,11 @@ var iDebugConsole = function() {
             noDTZoom(eCont) // prevent double tap zoom on ios
 
             // button events
-            eOptions.addEventListener("click", function (e) {
+            eOptions.delegateEventListener("click", function (e) {
                 e.preventDefault()
 
                 // disable buttons in help mode
-                if (!hasClass(e.target, 'btn-help') && hasClass(bHelp, 'active'))
+                if (!isTarget(e, 'btn-help', eOptions) && hasClass(bHelp, 'active'))
                     return
                 // close
                 if (hasClass(e.target, 'btn-close')) {
@@ -748,7 +780,7 @@ var iDebugConsole = function() {
 
                 }
                 // help
-                else if (hasClass(e.target, 'btn-help')) {
+                else if (isTarget(e, 'btn-help', eOptions)) {
 
                     var state = toggleClass(bHelp, 'active')
                     if (state) {
