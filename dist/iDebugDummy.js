@@ -22,6 +22,7 @@ var iDebugConsole = iDebugConsole || function() {
         on: function(){},
         global: function(){},
         initView: function(){},
+        setGlobalOptions: function(){},
     }
     window.iDebugger = new Debugger({window: this})
 
