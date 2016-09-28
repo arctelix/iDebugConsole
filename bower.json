@@ -30,7 +30,7 @@
     "docs"
   ],
   "dependencies": {
-    "vanillaHelper": "^0.1.5",
+    "vanillaHelper": "^0.1.6",
     "drag-resize-snap": "^0.1.1"
   }
 }
